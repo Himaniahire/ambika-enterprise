@@ -63,7 +63,7 @@
                             <a class="nav-link" href="{{ route('reports.master_report') }}">Master Report</a>
                             <a class="nav-link" href="{{ route('reports.company_po_report') }}">Company/PO/Service Code
                                 Report</a>
-                            <a class="nav-link" href="{{ route('reports.company_inv_report') }}">Pending Invoice
+                            <a class="nav-link" href="{{ route('reports.company_inv_report') }}">Pending Performa
                                 Report</a>
                             <a class="nav-link" href="{{ route('reports.invoice_report') }}">Invoice Payment Receive
                                 Report</a>
@@ -180,8 +180,8 @@
                             <a class="nav-link" href="{{ route('reports.salary_report') }}">Salary Report</a>
                             <a class="nav-link" href="{{ route('reports.emp_advance_report') }}">Employee Advance
                                 Report</a>
-                            <a class="nav-link" href="{{ route('reports.emp_salary_report') }}">Employee Salary
-                                Report</a>
+                            {{-- <a class="nav-link" href="{{ route('reports.emp_salary_report') }}">Employee Salary
+                                Report</a> --}}
                             <a class="nav-link" href="{{ route('reports.emp_join_leave_report') }}">Employee Join/Leave
                                 Report</a>
                         </nav>
@@ -195,6 +195,14 @@
                         User Register
                     </a>
                 @endif
+
+                <div class="sidenav-menu-heading">User</div>
+                {{-- @if(Auth::user()->permission->contains('name', 'users')) --}}
+                    <a class="nav-link collapsed" href="{{ route('complacences.index') }}">
+                        <div class="nav-link-icon"><img src="{{asset('admin_assets/sidebar_icon/menu.png')}}" alt="dashbord" style="width: 23px;"></div>
+                        Complacence
+                    </a>
+                {{-- @endif --}}
             </div>
         </div>
         <!-- Sidenav Footer-->
@@ -212,5 +220,4 @@
         </div>
     </nav>
 </div>
-   
-       
+

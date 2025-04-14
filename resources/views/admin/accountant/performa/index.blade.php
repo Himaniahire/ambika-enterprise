@@ -1,9 +1,30 @@
 @extends('admin.layouts.layout')
 @section('content')
 <style>
+    table.dataTable > thead > tr > th{
+        border-bottom: 1px solid rgb(0 0 0);
+    }
+
+    table.dataTable > tfoot > tr > th{
+        border-top: 0;
+    }
+
+    .dataTables_wrapper .dataTables_filter {
+        padding-bottom: 20px;
+    }
+
+    .dataTables_wrapper .dataTables_paginate {
+        padding-top: 0.70em;
+    }
+
+    table.dataTable tbody td {
+        padding: 8px 10px;
+        border-bottom: solid 1px black;
+    }
+
     .dataTables_processing {
-            display: none !important;
-        }
+        display: none !important;
+    }
 </style>
     <main>
         <header class="page-header page-header-compact page-header-light border-bottom bg-white mb-4">
@@ -36,9 +57,9 @@
                             </ul>
                         </div>
                     @endif
-                    <table id="performaTable">
+                    <table id="performaTable" style="font-size: 14px;">
                         <thead>
-                            <div class="row">
+                            <div class="row mb-3">
                                 <div class="col-md-3">
                                     <select id="statusFilter" class="form-select">
                                         <option value="">All</option>
@@ -118,7 +139,6 @@
         $('#performaTable').DataTable({
             processing: true,
             serverSide: true,
-            lengthChange: false,
             ajax: {
                 url: '{{ route('performa.index') }}',
                 data: function(d) {

@@ -382,9 +382,9 @@
         var currentDate = new Date();
         var currentYear = currentDate.getFullYear();
         var currentMonth = currentDate.getMonth() + 1; // JavaScript months are 0-based, so add 1
-    
+
         var startYear, endYear;
-    
+
         // Determine financial year based on month
         if (currentMonth < 4) {
             startYear = currentYear - 1;
@@ -393,10 +393,10 @@
             startYear = currentYear;
             endYear = currentYear + 1;
         }
-    
+
         var lastTwoDigitsStartYear = String(startYear).slice(-2);
         var lastTwoDigitsEndYear = String(endYear).slice(-2);
-    
+
         // Send AJAX request to fetch the latest summary number
         $.ajax({
             url: "{{ route('get-summary-number') }}",

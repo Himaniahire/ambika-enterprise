@@ -23,7 +23,22 @@
             background-color: red;
             /* Add any other styles for Sundays here */
         }
-        /* Add more styles as needed */
+        @if($exportType === 'pdf')
+            table {
+                border-collapse: collapse;
+                width: 50%;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            th, td {
+                padding: 1px;
+                text-align: left;
+            }
+            .sunday {
+                background-color: #FF6347;
+                color: white;
+            }
+        @endif
     </style>
 </head>
 <body>
@@ -31,7 +46,7 @@
     <table border="0" cellpadding="0" cellspacing="0" id="sheet0" class="sheet0 gridlines">
         <thead>
             <tr class="row0">
-                <th colspan="17" class="style210" style="text-align: center; font-weight: bold; font-size: 30px; height: 100px;">
+                <th colspan="18" class="style210" style="text-align: center; font-weight: bold; font-size: 30px; height: 100px;">
                     AMBIKA ENTERPRISE (MONTHLY SALARY) <br>
                     @if($companyName) {{ $companyName }} @endif
                 </th>
@@ -122,26 +137,46 @@
                     $totalFinalPresentAmount += $final_present_amount;
                     $totalFinalTotalAmount += $final_total_amount;
                     $totalNetTotalAmount += $net_total_amount;
+
+                    $status = $employee->status;  // 1 = Active, 0 = Inactive, 2 = Terminated, 3 = Resigned
+                    $statusColor = '';
+                    switch ($status) {
+                        case 1:  // Active
+                            $statusColor = '';
+                            break;
+                        case 0:  // Inactive
+                            $statusColor = '#D3D3D3';
+                            break;
+                        case 2:  // Terminated
+                            $statusColor = '#FF0000';
+                            break;
+                        case 3:  // Resigned
+                            $statusColor = '#FF0000';
+                            break;
+                        default:
+                            $statusColor = '';
+                            break;
+                    }
                 @endphp
                 <tr>
-                    <td class="style17" style="border:1px solid black; text-align:center;">{{ $i++ }}</td>
-                    <td class="style16" style="border:1px solid black; text-align:center;">{{ $salary->getEmployee->first_name ?? '' }} {{ $salary->getEmployee->last_name ?? '' }}</td>
-                    <td class="style16" style="border:1px solid black; text-align:center;">{{ $salary->getEmployee->father_name ?? '' }} {{ $salary->getEmployee->last_name ?? '' }}</td>
-                    <td class="style16" style="border:1px solid black; text-align:center;">{{ $salary->getEmployee->getEmployeePost->emp_post ?? '' }}</td>
-                    <td class="style16" style="border:1px solid black; text-align:center;">{{ $salary->getEmployee->income ?? '' }}</td>
-                    <td class="style17" style="border:1px solid black; text-align:center;">{{ $total_present ?? '' }}</td>
-                    <td class="style17" style="border:1px solid black; text-align:center;">{{ $salary->total_ot ?? '' }}</td>
-                    <td class="style17" style="border:1px solid black; text-align:center;">{{ $final_present_amount ?? '' }}</td>
-                    <td class="style17" style="border:1px solid black; text-align:center;">{{ $final_ot_amount ?? '' }}</td>
-                    <td class="style17" style="border:1px solid black; text-align:center;">{{ $final_total_amount ?? '' }}</td>
-                    <td class="style17" style="border:1px solid black; text-align:center;">{{ $salary->deduct_advance ?? '' }}</td>
-                    <td class="style17" style="border:1px solid black; text-align:center;">{{ $salary->getEmployee->advance ?? '' }}</td>
-                    <td class="style17" style="border:1px solid black; text-align:center;">{{ $salary->total_advance ?? '' }}</td>
-                    <td class="style17" style="border:1px solid black; text-align:center;">{{ $net_total_amount ?? '' }}</td>
-                    <td class="style17" style="border:1px solid black; text-align:center;">{{ $net_total_amount ?? '' }}</td>
-                    <td class="style17" style="border:1px solid black; text-align:center;">'{{ $salary->getEmployee->account_no ?? '' }}</td>
-                    <td class="style17" style="border:1px solid black; text-align:center;">{{ $salary->getEmployee->ifsc_code ?? '' }}</td>
-                    <td class="style17" style="border:1px solid black; text-align:center;">{{ $salary->note ?? '' }}</td>
+                    <td class="style17" style="border:1px solid black; text-align:center; background: {{ $statusColor }};">{{ $i++ }}</td>
+                    <td class="style16" style="border:1px solid black; text-align:center; background: {{ $statusColor }};">{{ $salary->getEmployee->first_name ?? '' }} {{ $salary->getEmployee->last_name ?? '' }}</td>
+                    <td class="style16" style="border:1px solid black; text-align:center; background: {{ $statusColor }};">{{ $salary->getEmployee->father_name ?? '' }} {{ $salary->getEmployee->last_name ?? '' }}</td>
+                    <td class="style16" style="border:1px solid black; text-align:center; background: {{ $statusColor }};">{{ $salary->getEmployee->getEmployeePost->emp_post ?? '' }}</td>
+                    <td class="style16" style="border:1px solid black; text-align:center; background: {{ $statusColor }};">{{ $salary->getEmployee->income ?? '' }}</td>
+                    <td class="style17" style="border:1px solid black; text-align:center; background: {{ $statusColor }};">{{ $total_present ?? '' }}</td>
+                    <td class="style17" style="border:1px solid black; text-align:center; background: {{ $statusColor }};">{{ $salary->total_ot ?? '' }}</td>
+                    <td class="style17" style="border:1px solid black; text-align:center; background: {{ $statusColor }};">{{ $final_present_amount ?? '' }}</td>
+                    <td class="style17" style="border:1px solid black; text-align:center; background: {{ $statusColor }};">{{ $final_ot_amount ?? '' }}</td>
+                    <td class="style17" style="border:1px solid black; text-align:center; background: {{ $statusColor }};">{{ $final_total_amount ?? '' }}</td>
+                    <td class="style17" style="border:1px solid black; text-align:center; background: {{ $statusColor }};">{{ $salary->deduct_advance ?? '' }}</td>
+                    <td class="style17" style="border:1px solid black; text-align:center; background: {{ $statusColor }};">{{ $salary->getEmployee->advance ?? '' }}</td>
+                    <td class="style17" style="border:1px solid black; text-align:center; background: {{ $statusColor }};">{{ $salary->total_advance ?? '' }}</td>
+                    <td class="style17" style="border:1px solid black; text-align:center; background: {{ $statusColor }};">{{ $net_total_amount ?? '' }}</td>
+                    <td class="style17" style="border:1px solid black; text-align:center; background: {{ $statusColor }};">{{ $net_total_amount ?? '' }}</td>
+                    <td class="style17" style="border:1px solid black; text-align:center; background: {{ $statusColor }};">'{{ $salary->getEmployee->account_no ?? '' }}</td>
+                    <td class="style17" style="border:1px solid black; text-align:center; background: {{ $statusColor }};">{{ $salary->getEmployee->ifsc_code ?? '' }}</td>
+                    <td class="style17" style="border:1px solid black; text-align:center; background: {{ $statusColor }};">{{ $salary->note ?? '' }}</td>
                 </tr>
             @endforeach
 

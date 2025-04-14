@@ -34,9 +34,13 @@ class RegisterCompanyController extends Controller
                 })
                 ->addColumn('status', function($row){
                     $btnClass = $row->com_status ? 'btn-switch-on' : 'btn-switch-off';
-                    $imgSrc = $row->com_status ? asset('admin_assets/index_icon/switch2.png') : asset('admin_assets/index_icon/switch1.png');
-                    return '<button class="toggle-status btnn ' . $btnClass . '" data-id="' . $row->id . '" data-status="' . ($row->com_status ? 1 : 0) . '" style="background: none; border: none;"><img src="' . $imgSrc . '" style="width: 50px;" alt=""></button>';
+                    $icon = $row->com_status ? 'toggle-right' : 'toggle-left';
+                
+                    return '<button class="toggle-status btnn ' . $btnClass . '" data-id="' . $row->id . '" data-status="' . ($row->com_status ? 1 : 0) . '" style="background: none; border: none;">
+                                <i data-feather="' . $icon . '" style="width: 50px;"></i>
+                            </button>';
                 })
+                
                 ->addColumn('action', function($row){
                     return '<ul class="list-unstyled hstack gap-1 mb-0"><li><a class="btn btn-sm btn-soft-danger" href="' . route('register_company.edit', $row->id) . '"><i data-feather="edit"></i></a></li></ul>';
                 })
@@ -297,7 +301,7 @@ class RegisterCompanyController extends Controller
     //                     ]);
     //                 }
     //             }
-                
+
     //             // foreach ($request->job_description as $key => $description) {
     //             //     $CompanyServiceCode = [
     //             //         'company_id'      => $companies_id,
@@ -307,9 +311,9 @@ class RegisterCompanyController extends Controller
     //             //         'uom'             => $request->uom[$key] ?? null,
     //             //         'price'           => $request->price[$key] ?? null,
     //             //     ];
-                
+
     //             //     $sr_no = $request->sr_no[$key] ?? null;
-                
+
     //             //     // Log request details for debugging
     //             //     Log::info('Processing Job Description', [
     //             //         'key' => $key,
@@ -319,7 +323,7 @@ class RegisterCompanyController extends Controller
     //             //         'order_no' => $CompanyServiceCode['order_no'],
     //             //         'service_code' => $CompanyServiceCode['service_code']
     //             //     ]);
-                
+
     //             //     // Check for existing record
     //             //     $existingRecord = CompanyServiceCode::where([
     //             //         'company_id'    => $companies_id,
@@ -327,11 +331,11 @@ class RegisterCompanyController extends Controller
     //             //         'job_description' => $description,
     //             //         'service_code'  => $CompanyServiceCode['service_code'],
     //             //     ])->first();
-                
+
     //             //     if ($sr_no) {
     //             //         $existingRecord = CompanyServiceCode::find($sr_no);
     //             //     }
-                
+
     //             //     if ($existingRecord) {
     //             //         $oldData = $existingRecord->toArray();
     //             //         $existingRecord->update($CompanyServiceCode);
@@ -340,14 +344,14 @@ class RegisterCompanyController extends Controller
     //             //         $existingRecord = CompanyServiceCode::create($CompanyServiceCode);
     //             //         $logAction = 'Created Service Code';
     //             //     }
-                
+
     //             //     // Log database action
     //             //     Log::info($logAction, [
     //             //         'entity_id' => $existingRecord->id,
     //             //         'old_data' => isset($oldData) ? $oldData : null,
     //             //         'new_data' => $CompanyServiceCode
     //             //     ]);
-                
+
     //             //     ActivityLog::create([
     //             //         'user_id' => Auth::id(),
     //             //         'action' => $logAction,
@@ -367,7 +371,7 @@ class RegisterCompanyController extends Controller
 
     //     return redirect('admin/accountant/register_company')->with('success','Company Registered Detail Update Successfully.');
     // }
-    
+
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -453,8 +457,8 @@ class RegisterCompanyController extends Controller
                     'old_data' => isset($oldData) ? json_encode($oldData) : null,
                     'new_data' => json_encode($CompanyServiceCode),
                     'details' => ($logAction === 'Updated Service Code')
-                        ? "Service Code '" . (isset($oldData['service_code']) ? $oldData['service_code'] : '') . 
-                          "' updated to '" . (isset($CompanyServiceCode['service_code']) ? $CompanyServiceCode['service_code'] : '') . 
+                        ? "Service Code '" . (isset($oldData['service_code']) ? $oldData['service_code'] : '') .
+                          "' updated to '" . (isset($CompanyServiceCode['service_code']) ? $CompanyServiceCode['service_code'] : '') .
                           "' for Company {$companies->companyname}"
                         : "New Service Code '{$existingRecord->service_code}' created for Company {$companies->companyname}"
                 ]);

@@ -21,7 +21,8 @@
 <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.print.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
-
+<script src="{{asset('admin_assets/cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js')}}" crossorigin="anonymous"></script>
+<script src="{{asset('admin_assets/demo/chart-bar-demo.js')}}"></script>
 <script>
     // $(document).ready(function() {
     //         new DataTable('#myTable', {

@@ -53,7 +53,7 @@
         <div class="container-fluid px-4">
             <div class="card">
                 <div class="card-body">
-                    <table id="sumTable" >
+                    <table id="sumTable" style="font-size: 14px;">
                         <thead>
                             <tr>
                                 <th>Sr. No.</th>

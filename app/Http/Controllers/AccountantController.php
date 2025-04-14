@@ -212,7 +212,6 @@ class AccountantController extends Controller
         ]);
     }
 
-
     public function fetchDataInvoice(Request $request)
     {
         $company_id = $request->company_id;
@@ -259,54 +258,67 @@ class AccountantController extends Controller
     }
 
     public function fetchDataCompanyInvoice(Request $request)
-    {
-        $companyId = $request->input('company_id');
-        $startDate = $request->input('start_date');
-        $endDate = $request->input('end_date');
+{
+    $companyId = $request->input('company_id');
+    $startDate = $request->input('start_date');
+    $endDate = $request->input('end_date');
+    $month = $request->input('month'); // expected format: 'YYYY-MM'
 
-        $summariesQuery = Summary::whereBetween('created_at', [$startDate, $endDate])
-            ->whereNull('invoice_no') // Add condition for invoice_no null
-            ->where(function ($query) {
-                $query->whereNotNull('performa_no')
-                    ->orWhereNotNull('invoice_no')
-                    ->orWhere(function ($subQuery) {
-                        $subQuery->where('invoice_status', '!=', 'Cancel')
-                            ->where('performa_status', '!=', 'Cancel')
-                            ->where('performa_status', '!=', 'Pending');
-                    });
-            })
-            ->select('id', 'company_id', 'sum_no', 'invoice_no', 'performa_no', 'po_no_id', 'price_total', 'gst_amount')
-            ->with('getCompany', 'getPO');
+    $summariesQuery = Summary::whereNull('invoice_no') // Invoice not created
+        ->where(function ($query) {
+            $query->whereNotNull('performa_no')
+                ->orWhereNotNull('invoice_no')
+                ->orWhere(function ($subQuery) {
+                    $subQuery->where('invoice_status', '!=', 'Cancel')
+                        ->where('performa_status', '!=', 'Cancel')
+                        ->where('performa_status', '!=', 'Pending');
+                });
+        })
+        ->select('id', 'company_id', 'sum_no', 'invoice_no', 'performa_no', 'po_no_id', 'price_total', 'gst_amount', 'performa_date', 'invoice_date')
+        ->with('getCompany', 'getPO');
 
-        if ($companyId !== null && $companyId != 0) {
-            $summariesQuery->where('company_id', $companyId);
-        }
-
-        // Add sorting logic
-        $summariesQuery->orderByRaw("CAST(SUBSTRING_INDEX(summaries.performa_no, '/', -1) AS UNSIGNED) ASC");
-
-        $summaries = $summariesQuery->get();
-
-        $summaries->transform(function ($summary) {
-            return [
-                'companyname' => $summary->getCompany->companyname,
-                'sum_no' => $summary->sum_no . '/' . str_pad($summary->id, 5, '0', STR_PAD_LEFT),
-                'performa_date' => $summary->performa_date,
-                'price_total' => $summary->price_total,
-                'gst_amount' => $summary->gst_amount,
-                \Carbon\Carbon::parse($summary->invoice_date)->format('d-m-Y'),
-                'performa_no' => $summary->performa_no,
-                'po_no' => $summary->getPO->po_no ?? 'N/A',
-                'total' => $summary->getPO->total ?? 'N/A',
-            ];
-        });
-
-        return response()->json([
-            'summaries' => $summaries,
-        ]);
+    // Filter by date range if given
+    if ($startDate && $endDate) {
+        $summariesQuery->whereBetween('created_at', [$startDate, $endDate]);
     }
 
-public function generateExcel(Request $request)
+    // Filter by month if provided
+    if (!empty($month)) {
+        $summariesQuery->whereMonth('created_at', '=', \Carbon\Carbon::parse($month)->month)
+                       ->whereYear('created_at', '=', \Carbon\Carbon::parse($month)->year);
+    }
+
+    // Filter by company
+    if ($companyId !== null && $companyId != 0) {
+        $summariesQuery->where('company_id', $companyId);
+    }
+
+    // Sorting logic
+    $summariesQuery->orderByRaw("CAST(SUBSTRING_INDEX(summaries.performa_no, '/', -1) AS UNSIGNED) ASC");
+
+    $summaries = $summariesQuery->get();
+
+    // Transform data
+    $summaries->transform(function ($summary) {
+        return [
+            'companyname' => $summary->getCompany->companyname ?? 'N/A',
+            'sum_no' => $summary->sum_no . '/' . str_pad($summary->id, 5, '0', STR_PAD_LEFT),
+            'performa_date' => $summary->performa_date,
+            'price_total' => $summary->price_total,
+            'gst_amount' => $summary->gst_amount,
+            'invoice_date' => $summary->invoice_date ? \Carbon\Carbon::parse($summary->invoice_date)->format('d-m-Y') : 'N/A',
+            'performa_no' => $summary->performa_no,
+            'po_no' => $summary->getPO->po_no ?? 'N/A',
+            'total' => $summary->getPO->total ?? 'N/A',
+        ];
+    });
+
+    return response()->json([
+        'summaries' => $summaries,
+    ]);
+}
+
+    public function generateExcel(Request $request)
     {
         $companyId = $request->company_id;
         $startDate = $request->start_date;
@@ -357,14 +369,12 @@ public function generateExcel(Request $request)
         }
 
         return Excel::download(new SummaryExport($summaries, $companyName, $gstNumber, $panNumber, $state), $filename);
-
-
     }
 
 
-    
 
-    
+
+
 
 
 

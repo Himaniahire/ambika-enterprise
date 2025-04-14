@@ -40,11 +40,9 @@
                             <tr>
                                 <th>Sr. No.</th>
                                 <th>Company Name</th>
-                                <th>Phone / Email</th>
+                                <th>State</th>
                                 <th>GST Number</th>
                                 <th>PAN Number</th>
-                                <th>State</th>
-                                <th>Date</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
@@ -53,11 +51,9 @@
                             <tr>
                                 <th>Sr. No.</th>
                                 <th>Company Name</th>
-                                <th>Phone / Email</th>
+                                <th>State</th>
                                 <th>GST Number</th>
                                 <th>PAN Number</th>
-                                <th>State</th>
-                                <th>Date</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
@@ -126,11 +122,9 @@ $(document).ready(function() {
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
             { data: 'companyname', name: 'companyname' },
-            { data: 'phone', name: 'phone' },
+            { data: 'state', name: 'state' },
             { data: 'gstnumber', name: 'gstnumber' },
             { data: 'pannumber', name: 'pannumber' },
-            { data: 'state', name: 'state' },
-            { data: 'created_at', name: 'created_at' },
             { data: 'status', name: 'status', orderable: false, searchable: false },
             { data: 'action', name: 'action', orderable: false, searchable: false }
         ],

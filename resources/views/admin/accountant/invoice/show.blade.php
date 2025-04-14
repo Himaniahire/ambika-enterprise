@@ -160,9 +160,10 @@
 </head>
 
 <body>
+    <h4 style="text-align: center">TAX-INVOICE</h4>
     <div class="container">
         <div class="header">
-            <p class="text-red"><b>AMBIKA ENTERPRISE</b></h4>
+            <h4 class="text-red"><b>AMBIKA ENTERPRISE</b></h4>
             <p style=" font-size:11px;">453, SASTA ANAJ FALIYA, BORBHATABET, MAKTAMPUR, BHARUCH-391001, GUJARAT, INDIA.</p>
             <p style=" font-size:11px;">(Issued under Section 31 of the central goods and service tax act 2017)</p>
             <p style=" font-size:11px;"><a href="">Email ID: ambikaenterprise06@gmail.com</a></p>

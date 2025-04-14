@@ -37,6 +37,7 @@
                             <form action="{{route('export.attendance')}}" method="" id="report-form">
                                 @csrf
                                 <!-- Form Row -->
+                                <input type="hidden" name="export_type" id="export_type" value="">
                                 <div class="row gx-3 mb-3">
                                     <!-- Form Group -->
                                     <div class="col-6 col-md-4">
@@ -50,18 +51,11 @@
                                     </div>
                                     <div class="col-6 col-md-4">
                                         <label class="small mb-1" for="monthDropdown">Month</label>
-                                        <select class="form-control" id="monthDropdown" name="month" required>
-                                            <option value="" disabled selected>Select Month</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-6 col-md-4">
-                                        <label class="small mb-1" for="yearDropdown">Year</label>
-                                        <select class="form-control" id="yearDropdown" name="year" required>
-                                            <option value="" disabled selected>Select Year</option>
-                                        </select>
+                                        <input type="month" class="form-control" name="month" id="monthDropdown">
                                     </div>
                                 </div>
-                                <button class="btn btn-primary" type="submit">Search</button>
+                                <button class="btn btn-primary" type="submit" onclick="setExportType('excel')">Get Excel</button>
+                                <button class="btn btn-primary" type="submit" onclick="setExportType('pdf')">Get PDF</button>
                             </form>
                         </div>
                     </div>
@@ -107,6 +101,10 @@
                 }));
             }
         });
+
+        function setExportType(type) {
+        document.getElementById('export_type').value = type;
+    }
 </script>
 
 @endsection

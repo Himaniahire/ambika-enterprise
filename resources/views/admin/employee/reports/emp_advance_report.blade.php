@@ -41,7 +41,7 @@
                                     <!-- Form Group -->
                                     <div class="col-6 col-md-4">
                                         <label class="small mb-1" for="inputFirstName">Employee Name</label>
-                                        <select class="form-control" id="emp_id" name="emp_id" required>
+                                        <select class="form-control select2" id="emp_id" name="emp_id" required>
                                             <option value="">Select Employee Name</option>
                                             @foreach ($employee as $item)
                                                 <option value="{{ $item->id }}">{{ $item->first_name }} {{ $item->father_name }} {{ $item->last_name }}</option>
@@ -64,8 +64,16 @@
 @endsection
 
 @section('footer-script')
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
+
+$(document).ready(function() {
+        $('.select2').select2({
+            placeholder: "Select Employee Name",
+            allowClear: true
+        });
+    });
     // $(document).ready(function() {
     //     var months = [
     //         { value: '01', name: 'January' },

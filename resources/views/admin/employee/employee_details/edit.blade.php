@@ -77,16 +77,18 @@
                                 </div>
                                 <div class="col-6 col-md-4">
                                     <label for="productname">Employee Post <span class="text-danger">*</span></label>
-                                     <select class="form-control emp_post @error('emp_post') is-invalid @enderror" name="emp_post_id" id="post">
-                                        @if ($employee->emp_post_id === null)
+                                    <select class="form-control emp_post @error('emp_post') is-invalid @enderror" name="emp_post_id" id="post">
+                                        @if ($employee->emp_post_id === null || !$employee->getEmployeePost)
                                             <option value="">Select Employee Post</option>
                                         @else
-                                            <option value="{{$employee->getEmployeePost->id}}">{{$employee->getEmployeePost->emp_post}}</option>
+                                            <option value="{{ $employee->getEmployeePost->id }}">{{ $employee->getEmployeePost->emp_post }}</option>
                                         @endif
+
                                         @foreach ($employeePost as $item)
-                                             <option value="{{ $item->id }}">{{ $item->emp_post }}</option>
+                                            <option value="{{ $item->id }}">{{ $item->emp_post }}</option>
                                         @endforeach
                                     </select>
+
                                     @error('emp_post')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -134,20 +136,36 @@
                                 <div class="col-4 col-md-4">
                                     <label for="productname">Income Type <span class="text-danger">*</span></label>
                                     <div class="row income_type">
-                                        <div class="col-6">
-                                            <input type="radio" name="income_type" value="1" id="fixIncome" @if ($employee->income_type === '1') checked @endif>
-                                            <label for="fixIncome" style="padding-right: 10px;"><b> Fix Income</b></label>
+                                        <div class="col-12">
+                                            <select name="income_type" id="incomeType" class="form-control">
+                                                <option value="1" @if ($employee->income_type === '1') selected @endif>Fix</option>
+                                                <option value="0" @if ($employee->income_type === '0') selected @endif>Per Day</option>
+                                                <option value="2" @if ($employee->income_type === '2') selected @endif>Fix + OT</option>
+                                            </select>
                                         </div>
-                                        <div class="col-6">
-                                            <input type="radio" name="income_type" value="0" id="perDayIncome" @if ($employee->income_type === '0') checked @endif>
-                                            <label for="perDayIncome" style="padding-right: 10px;"><b> Per Day Income</b></label>
-                                        </div>
+
                                     </div>
                                     @error('income_type')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
+                                </div>
 
-                                    <label for="productname" style="margin-top: 60px;">Employee Status <span class="text-danger">*</span></label>
+
+                                <div class="col-4 col-md-4" id="daysInput" style="display: none;">
+                                    <label for="productname">Days <span class="text-danger">*</span></label>
+                                    <input id="productname" name="days" type="number" class="form-control days @error('days') is-invalid @enderror"
+                                           value="{{ $employee->days }}" placeholder="Days">
+                                </div>
+
+                                <div class="col-4 col-md-4">
+                                    <label for="productname">Income <span class="text-danger">*</span></label>
+                                    <input id="productname" name="income" type="number" class="form-control income @error('income') is-invalid @enderror" value="{{ $employee->income }}" placeholder="Income">
+                                    @error('income')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-4 col-md-4">
+                                    <label for="productname">Employee Status <span class="text-danger">*</span></label>
                                     <div class="row status">
                                         <div class="col-6">
                                             <input type="radio" name="status" value="1" id="statusActive" @if ($employee->status === '1') checked @endif>
@@ -157,20 +175,6 @@
                                             <input type="radio" name="status" value="0" id="statusInactive" @if ($employee->status === '0') checked @endif>
                                             <label for="statusInactive" style="padding-right: 10px;"><b> Inactive</b></label>
                                         </div>
-                                    </div>
-                                    @error('status')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
-                                <div class="col-3 col-md-3">
-                                    <label for="productname">Income <span class="text-danger">*</span></label>
-                                    <input id="productname" name="income" type="number" class="form-control income @error('income') is-invalid @enderror" value="{{ $employee->income }}" placeholder="Income">
-                                    @error('income')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-
-                                    <div class="row status" style="margin-top: 75px;">
                                         <div class="col-6">
                                             <input type="radio" name="status" value="2" id="statusTerminated" @if ($employee->status === '2') checked @endif data-bs-toggle="modal" data-bs-target="#terminationModalCenter" data-employee-id="{{ $employee->id }}">
                                             <label for="statusTerminated" style="padding-right: 10px;"><b> Terminated</b></label>
@@ -185,12 +189,6 @@
                                 <div class="col-5 col-md-5">
                                     <label for="manufacturerbrand">Address</label>
                                     <textarea class="form-control" name="address" id="" cols="30" rows="5">{{ $employee->address }}</textarea>
-                                </div>
-
-                                <div class="col-3 col-md-3" id="daysInput" style="margin-top: -110px; display: none;">
-                                    <label for="productname">Days <span class="text-danger">*</span></label>
-                                    <input id="productname" name="days" type="number" class="form-control days @error('days') is-invalid @enderror"
-                                           value="{{ $employee->days }}" placeholder="Days">
                                 </div>
 
                                 <div class="row mt-3">
@@ -267,7 +265,7 @@
                                                     <input id="productname" name="police_verification" type="file" class="form-control " value="{{ $employee->police_verification }}" placeholder="Account Number">
                                                 </div>
 
-                                                
+
                                             </div>
                                         </div>
                                     </div>
@@ -275,7 +273,7 @@
                             </div>
                             <button class="btn btn-primary" type="submit">Update Employee</button>
                         </form>
-                        
+
                         <!-- Termination Modal -->
                                                 <div class="modal fade" id="terminationModalCenter" tabindex="-1" role="dialog" aria-labelledby="terminationModalCenterTitle" aria-hidden="true">
                                                     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -467,12 +465,14 @@
                 $('.emp_type').removeClass('is-invalid');
             }
 
-            if (!$('input[name="income_type"]:checked').val()) {
+            if ($('#incomeType').val() === '') {
                 isValid = false;
                 $('.income_type').addClass('is-invalid').after('<div class="invalid-feedback">Please select an Income Type.</div>');
             } else {
                 $('.income_type').removeClass('is-invalid');
+                $('.invalid-feedback').remove();  // Remove any existing error messages
             }
+
 
             if ($('.income').val() === '') {
                 isValid = false;
@@ -546,11 +546,19 @@
 
     $(document).ready(function() {
         // Check if the Fix Income radio button is checked on page load
-        if ($('#fixIncome').is(':checked')) {
-            $('#daysInput').show();
-        } else {
-            $('#daysInput').hide();
-        }
+        $('#incomeType').change(function() {
+            if ($('#incomeType').val() === '1') { // Fix Income is selected
+                $('#daysInput').show();
+            } else {
+                $('#daysInput').hide();
+            }
+        });
+
+        // Trigger the change event on page load to ensure it works when the page is loaded with a pre-selected value
+        $(document).ready(function() {
+            $('#incomeType').trigger('change');
+        });
+
 
         // Show/Hide the Days input field based on radio button change
         $('input[name="income_type"]').change(function() {

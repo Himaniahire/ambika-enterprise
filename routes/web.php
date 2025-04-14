@@ -30,8 +30,12 @@ Route::group(['prefix' => '/admin','middleware' => ['auth','isAdmin']], function
     Route::controller(App\Http\Controllers\AdminController::class)->group(function () {
         Route::get('/', 'index')->name('adminhome');
         Route::get('/activity_log', 'activityLog')->name('activity_log.index');
+
         // Route::get('/admin_password_changes', 'adminPasswordChange')->name('password.changes');
     });
+
+    Route::resource('/complacences', App\Http\Controllers\ComplacenceController::class);
+    Route::delete('/complacences/{id}', [App\Http\Controllers\ComplacenceController::class, 'destroyDoc'])->name('complacences.destroyDoc');
 
     Route::controller(App\Http\Controllers\UserController::class)->group(function () {
         Route::get('user', 'index')->name('user.index');
@@ -178,6 +182,8 @@ Route::group(['prefix' => 'admin/employee','middleware' => ['auth','isDataEntry'
     });
 
     Route::resource('/employee_advance_salary', App\Http\Controllers\EmployeeAdvanceSalaryController::class);
+    Route::get('/getEmployees/{companyId}', [App\Http\Controllers\EmployeeAdvanceSalaryController::class, 'getEmployeesByCompany'])->name('getEmployees');
+
     // Route::resource('/employee_salary', App\Http\Controllers\EmployeeSalaryController::class);
     Route::controller(App\Http\Controllers\EmployeeSalaryController::class)->group(function () {
         Route::get('employee_salary/create', 'create')->name('employee_salary.create');

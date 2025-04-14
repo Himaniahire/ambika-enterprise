@@ -10,6 +10,7 @@ class EmployeeAdvanceSalary extends Model
     use HasFactory;
 
     protected $fillable = [
+        'company_id',
         'emp_id',
         'advance_date',
         'advance_amount',

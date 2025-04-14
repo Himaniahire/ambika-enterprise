@@ -6,6 +6,7 @@ use App\Models\EmployeeAdvanceSalary;
 use App\Models\Employee;
 use Yajra\DataTables\DataTables;
 use Illuminate\Http\Request;
+use App\Models\RegisterCompany;
 use Carbon\Carbon;
 
 class EmployeeAdvanceSalaryController extends Controller
@@ -31,11 +32,12 @@ class EmployeeAdvanceSalaryController extends Controller
                 ->make(true);
         }
 
+        $companies = RegisterCompany::get();
         $employees = Employee::where('status', '=', '1')
-            ->where('emp_type', '=', 'Site Employee')
+            ->where('emp_type', '=', 'Site Employee')->orderBy('first_name', 'asc')
             ->get();
 
-        return view('admin.employee.employee_advance_salary.index', compact('employees'));
+        return view('admin.employee.employee_advance_salary.index', compact('employees','companies'));
     }
 
     /**
@@ -46,6 +48,12 @@ class EmployeeAdvanceSalaryController extends Controller
         //
     }
 
+    public function getEmployeesByCompany($companyId)
+    {
+        $employees = Employee::where('company_id', $companyId)->get();
+        return response()->json($employees);
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -53,6 +61,7 @@ class EmployeeAdvanceSalaryController extends Controller
     {
         // Validate the request
         $request->validate([
+            'company_id' => 'required',
             'emp_id' => 'required',
             'advance_date' => 'required',
             'advance_amount' => 'required',
@@ -60,6 +69,7 @@ class EmployeeAdvanceSalaryController extends Controller
 
         // Save the new advance record
         $employeeAdvanceSalary = new EmployeeAdvanceSalary();
+        $employeeAdvanceSalary->company_id = $request->company_id;
         $employeeAdvanceSalary->emp_id = $request->emp_id;
         $employeeAdvanceSalary->advance_date = $request->advance_date;
         $employeeAdvanceSalary->advance_amount = $request->advance_amount;

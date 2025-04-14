@@ -79,12 +79,20 @@ class SummaryController extends Controller
                 'invoice_no' => $summary->invoice_no ?? "N/A",
                 'total' => $summary->total,
                 'action' => '
-                    <ul class="list-unstyled hstack gap-1 mb-0">
-                        <li><a href="' . route('summary.excel', $summary->id) . '" class="btn btn-sm btn-soft-primary"><img src="' . asset('admin_assets/index_icon/xls.png') . '" alt="XLS" style="width: 15px;"></a></li>
-                        <li><a href="' . route('summary.show', $summary->id) . '" class="btn btn-sm btn-soft-primary" target="_blank"><i data-feather="file-text"></i></a></li>
-                        <li><a class="btn btn-sm btn-soft-danger" href="' . route('summary.edit', $summary->id) . '"><i data-feather="edit"></i></a></li>
-                        <form action="' . route('summary.destroy', $summary->id) . '" method="POST" style="display:inline;">' . csrf_field() . method_field('DELETE') . '<button type="submit" style="border: none; background: transparent; padding: 0px" onclick="return confirm(\'Are you sure you want to delete this item?\');"><a class="btn btn-sm btn-soft-danger"><i data-feather="trash-2"></i></a></button></form>
-                    </ul>',
+                    <div class="dropdown">
+                        <a class="btn btn-sm btn-soft-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="border: none;">
+                            <i data-feather="settings"></i>
+                        </a>
+                        <ul class="dropdown-menu p-3">
+                            <div class="d-flex flex-wrap gap-2 justify-content-center">
+                                <li><a href="' . route('summary.excel', $summary->id) . '" class="btn btn-sm btn-soft-primary"><img src="' . asset('admin_assets/index_icon/xls.png') . '" alt="XLS" style="width: 15px;"></a></li>
+                                <li><a href="' . route('summary.show', $summary->id) . '" class="btn btn-sm btn-soft-primary" target="_blank"><i data-feather="file-text"></i></a></li>
+                                <li><a class="btn btn-sm btn-soft-danger" href="' . route('summary.edit', $summary->id) . '"><i data-feather="edit"></i></a></li>
+                                <form action="' . route('summary.destroy', $summary->id) . '" method="POST" style="display:inline;">' . csrf_field() . method_field('DELETE') . '<button type="submit" style="border: none; background: transparent; padding: 0px" onclick="return confirm(\'Are you sure you want to delete this item?\');"><a class="btn btn-sm btn-soft-danger"><i data-feather="trash-2"></i></a></button></form>
+                            </div>
+                        </ul>
+                    </div>
+                ',
             ];
             $data[] = $nestedData;
         }
@@ -115,11 +123,11 @@ class SummaryController extends Controller
     public function getSummaryNumber(Request $request)
     {
         $companyId = $request->input('company_id');
-    
+
         // Determine financial year format (same logic as frontend)
         $currentMonth = now()->month;
         $currentYear = now()->year;
-    
+
         if ($currentMonth < 4) {
             $startYear = $currentYear - 1;
             $endYear = $currentYear;
@@ -127,16 +135,16 @@ class SummaryController extends Controller
             $startYear = $currentYear;
             $endYear = $currentYear + 1;
         }
-    
+
         $lastTwoDigitsStartYear = substr($startYear, -2);
         $lastTwoDigitsEndYear = substr($endYear, -2);
         $prefix = "{$lastTwoDigitsStartYear}-{$lastTwoDigitsEndYear}/SUM/";
-    
+
         // Fetch the latest summary number for the company within the current financial year
         $latestSummary = Summary::where('sum_no', 'LIKE', "$prefix%")
             ->orderBy('id', 'desc')
             ->first();
-    
+
         if ($latestSummary) {
             // Extract the numeric part and increment
             $lastNumber = (int) substr($latestSummary->sum_no, -5);
@@ -144,7 +152,7 @@ class SummaryController extends Controller
         } else {
             $newNumber = 1;
         }
-    
+
         return response()->json([
             'latest_number' => $newNumber
         ]);
@@ -215,6 +223,7 @@ class SummaryController extends Controller
      */
     public function store(Request $request)
     {
+        // dd($request);
         $request->validate([
             'company_name' => 'required',
             'summary_duration' => 'required|string|max:255',
@@ -336,13 +345,13 @@ class SummaryController extends Controller
         $i = 1;
         $descriptionArr = [];
         $uomArr = [];
-        
+
         foreach ($descData as $descDataKey => $descDataVal) {
             $descriptionArr[] = $descDataVal['job_description'];
             $uomArr[] = $descDataVal['uom'];
         }
-        
-        $data = compact('summaries', 'i', 'descriptionArr', 'uomArr'); 
+
+        $data = compact('summaries', 'i', 'descriptionArr', 'uomArr');
 
         $pdf = PDF::loadView('admin.accountant.summary.show', $data)->setPaper('A3', 'landscape');
 
@@ -512,7 +521,7 @@ class SummaryController extends Controller
     $totalQty = 0;
     $totalPriceTotal = 0;
     $totalGstAmount = 0;
-    
+
     foreach ($serviceCodeIds as $serviceCodeId) {
         $serviceTotalQty = SummaryProduct::where('summary_id', $id)
             ->where('service_code_id', $serviceCodeId)

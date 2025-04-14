@@ -64,3 +64,34 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+
+Good Morning,
+
+Here is the To Do list for of 14-04-2025 :
+
+
+
+    A)  Ambika :
+
+        -  Add Date Filter Invoice / Performa List Done
+        -  In proforma and invoices tab if I am searching the company name then total should appear below that.
+        -  Master Report
+            -  Add All Company Option
+            -  Performa Invoice Amount Count display separate   
+
+    B)  Aalekh :
+
+        -   Bug Solving
+
+        -   Change Font
+
+
+
+Sincerely,
+
+Himani Ahire
+
+
+
+

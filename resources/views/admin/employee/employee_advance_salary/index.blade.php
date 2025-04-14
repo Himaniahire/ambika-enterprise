@@ -60,8 +60,17 @@
                     <form action="{{ route('employee_advance_salary.store') }}" method="POST">
                         @csrf
                         <div class="mb-3">
+                            <label class="small mb-1" for="inputFirstName">Company Name</label>
+                            <select class="form-control" id="company_id" name="company_id" required>
+                                <option value="">Select Company Name</option>
+                                @foreach ($companies as $item)
+                                    <option value="{{ $item->id }}">{{ $item->companyname }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3">
                             <label class="mb-1 small" for="emp_id">Employee Name <span class="text-danger">*</span></label>
-                            <select class="form-control" name="emp_id" id="emp_id" required>
+                            <select class="form-control select2" name="emp_id" id="emp_id" required>
                                 <option value="" disabled selected>Select Employee</option>
                                 @foreach ($employees as $employee)
                                     <option value="{{$employee->id}}">{{$employee->first_name}} {{$employee->father_name}} {{$employee->last_name}}</option>
@@ -90,8 +99,20 @@
 @endsection
 
 @section('footer-script')
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
+
+$(document).ready(function() {
+        $('#createGroupModal').on('shown.bs.modal', function () {
+            $('#emp_id').select2({
+                dropdownParent: $('#createGroupModal'),
+                placeholder: "Select Employee",
+                allowClear: true,
+                width: '100%' // ensures it matches Bootstrap input width
+            });
+        });
+    });
 $(document).ready(function() {
     $('#salaryAdvTable').DataTable({
         processing: true,
@@ -111,6 +132,61 @@ $(document).ready(function() {
         order: [[1, 'asc']], // Sort by the companyname column by default
     });
 });
+$(document).ready(function() {
+    // On Company dropdown change
+    $('#company_id').on('change', function() {
+        var companyId = $(this).val(); // Get the selected company ID
+
+        if (companyId) {
+            // Make AJAX request to get employees for the selected company
+            $.ajax({
+                url: '{{ route("getEmployees", ":companyId") }}'.replace(':companyId', companyId),
+                method: 'GET',
+                success: function(data) {
+                    // Clear the current employee options
+                    $('#emp_id').empty();
+
+                    // Add a default 'Select Employee' option
+                    $('#emp_id').append('<option value="" disabled selected>Select Employee</option>');
+
+                    // Loop through the returned employees and append to the employee dropdown
+                    $.each(data, function(key, employee) {
+                        $('#emp_id').append('<option value="' + employee.id + '">' + employee.first_name + ' ' + employee.father_name + ' ' + (employee.last_name ?? '') + '</option>');
+                    });
+
+                    // Reinitialize select2 (if you are using select2 for better UI)
+                    if (!$('#emp_id').data('select2')) {
+                        $('#emp_id').select2();
+                    }
+                },
+                error: function() {
+                    // Handle error gracefully in the UI
+                    alert('Error loading employee data.');
+                }
+            });
+        } else {
+            // If no company is selected, reset the employee dropdown
+            $('#emp_id').empty();
+            $('#emp_id').append('<option value="" disabled selected>Select Employee</option>');
+        }
+    });
+
+    // Initialize select2 in the modal when it is shown
+    $('#createGroupModal').on('shown.bs.modal', function () {
+        // Reset employee dropdown
+        $('#emp_id').empty();
+        $('#emp_id').append('<option value="" disabled selected>Select Employee</option>');
+
+        // Initialize select2 for the modal
+        $('#emp_id').select2({
+            dropdownParent: $('#createGroupModal'),
+            placeholder: "Select Employee",
+            allowClear: true,
+            width: '100%' // ensures it matches Bootstrap input width
+        });
+    });
+});
+
 </script>
 
 @endsection

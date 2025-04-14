@@ -13,6 +13,7 @@ use App\Models\EmployeeSalary;
 use App\Models\Employee;
 use Carbon\Carbon;
 use DataTables;
+use PDF;
 
 class DataEntryController extends Controller
 {
@@ -53,27 +54,17 @@ class DataEntryController extends Controller
     public function attendanceExport(Request $request)
     {
         $month = $request->input('month');
-        $year = $request->input('year');
         $company_id = $request->input('company_id');
+        $exportType = $request->input('export_type'); // Get the export type from the form
 
-        // Basic input validation
-        if (empty($month) || empty($year)) {
+        if (empty($month)) {
             return redirect()->back()->withInput()->withErrors('Month and year are required.');
         }
 
-        // Parse the selected month and year
-        $monthDate = \Carbon\Carbon::createFromFormat('m', $month)->startOfMonth();
-        $yearDate = \Carbon\Carbon::createFromDate($year, 12, 31)->endOfYear();
+        $monthDate = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
 
-        // Additional validation: Ensure month is before or equal to year
-        if ($monthDate->gt($yearDate)) {
-            return redirect()->back()->withInput()->withErrors('Selected month must be within the selected year.');
-        }
-
-        // Query based on month, year, and optionally company_id
         $query = EmployeeAttendance::with(['getEmployee', 'getEmployee.getEmployeePost'])
-            ->whereDate('attendance_date', '>=', $monthDate)
-            ->whereDate('attendance_date', '<=', $yearDate);
+            ->whereDate('attendance_date', '>=', $monthDate);
 
         if (!empty($company_id)) {
             $query->where('company_id', $company_id);
@@ -81,40 +72,37 @@ class DataEntryController extends Controller
 
         $attendances = $query->get();
 
-        // Fetch the company name using the company_id
-        $companyName = RegisterCompany ::where('id', $company_id)->value('companyname');
+        $companyName = RegisterCompany::where('id', $company_id)->value('companyname');
+        $data = compact('attendances', 'monthDate', 'month', 'companyName', 'exportType');
 
-        $data = compact('attendances','monthDate','year','month', 'companyName');
-
-        // Download Excel file using Maatwebsite Excel package
-        return Excel::download(new EmployeeAttendanceExport($data), 'employee_attendance.xlsx');
-
+        if ($exportType === 'excel') {
+            return Excel::download(new EmployeeAttendanceExport($data), 'employee_attendance.xlsx');
+        } elseif ($exportType === 'pdf') {
+            $pdf = Pdf::loadView('admin.employee.employee_attendance.employee_attendance', $data)
+                ->setPaper('A2', 'landscape');
+            return $pdf->stream('employee_attendance.pdf');
+        } else {
+            return redirect()->back()->with('error', 'Invalid export type selected.');
+        }
     }
 
     public function salaryExport(Request $request)
     {
         $month = $request->input('month');
-        $year = $request->input('year');
         $company_id = $request->input('company_id');
+        $exportType = $request->input('export_type'); // Get the export type from the form
 
         // Basic input validation
-        if (empty($month) || empty($year)) {
+        if (empty($month)) {
             return redirect()->back()->withInput()->withErrors('Month and year are required.');
         }
 
         // Parse the selected month and year
-        $monthDate = \Carbon\Carbon::createFromFormat('m', $month)->startOfMonth()->format('Y-m');
-        $yearDate = \Carbon\Carbon::createFromDate($year, 12, 31)->format('Y-m-d');
-
-        // Additional validation: Ensure month is before or equal to year
-        if ($monthDate > $yearDate) {
-            return redirect()->back()->withInput()->withErrors('Selected month must be within the selected year.');
-        }
+        $monthDate = \Carbon\Carbon::createFromFormat('Y-m', $month)->startOfMonth();
 
         // Query based on month, year, and optionally company_id
         $query = EmployeeSalary::with(['getEmployee', 'getEmployee.getEmployeePost'])
-            ->where('salary_month', '>=', $monthDate)
-            ->where('salary_month', '<=', $yearDate);
+            ->where('salary_month', '>=', $monthDate);
 
         if (!empty($company_id)) {
             $query->where('com_id', $company_id);
@@ -133,13 +121,20 @@ class DataEntryController extends Controller
         $data = [
             'salaries' => $salaries,
             'monthDate' => $monthDate,
-            'year' => $year,
             'month' => $month,
-            'companyName' => $companyName
+            'companyName' => $companyName,
+            'exportType'  => $exportType,
         ];
 
-        return Excel::download(new EmployeeSalaryExport($data), 'employee_salary.xlsx');
-
+        if ($exportType === 'excel') {
+            return Excel::download(new EmployeeSalaryExport($data), 'employee_salary.xlsx');
+        } elseif ($exportType === 'pdf') {
+            $pdf = Pdf::loadView('admin.employee.employee_salary.employee_salary', $data)
+                ->setPaper('A1', 'landscape');
+            return $pdf->stream('employee_salary.pdf');
+        } else {
+            return redirect()->back()->with('error', 'Invalid export type selected.');
+        }
     }
 
     public function fetchEmpAdvanceReport(Request $request)

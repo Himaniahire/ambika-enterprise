@@ -16,7 +16,7 @@
                         <div class="col-auto mb-3">
                             <h1 class="page-header-title">
                                 <div class="page-header-icon"><i data-feather="user-plus"></i></div>
-                                Pending Invoice Report
+                                Pending Perform Report
                             </h1>
                         </div>
                         <div class="col-12 col-xl-auto mb-3">
@@ -32,7 +32,7 @@
                 <div class="col-xl-12">
                     <!-- Account details card -->
                     <div class="card mb-4">
-                        <div class="card-header">Pending Invoice Report</div>
+                        <div class="card-header">Pending Perform Report</div>
                         <div class="card-body">
                             <form action="" method="" id="report-form">
                                 @csrf
@@ -52,12 +52,17 @@
                                     <div class="col-6 col-md-4">
                                         <label class="small mb-1" for="inputFirstName">Start Date</label>
                                         <input class="form-control" id="start_date" type="date" name="start_date"
-                                            value="" required />
+                                            value="" />
                                     </div>
                                     <div class="col-6 col-md-4" id="inputContainer">
                                         <label class="small mb-1" for="inputFirstName">End Date</label>
                                         <input class="form-control" type="date" name="end_date" id="end_date"
-                                            value="" required />
+                                            value="" />
+                                    </div>
+                                    <div class="col-6 col-md-4" id="inputContainer">
+                                        <label class="small mb-1" for="inputFirstName">Month</label>
+                                        <input class="form-control" type="month" name="month" id="month"
+                                            value="" />
                                     </div>
                                 </div>
                                 <button class="btn btn-primary" type="submit">Search</button>
@@ -75,7 +80,7 @@
                 <div class="col-xl-12">
                     <!-- Account details card -->
                     <div class="card mb-4">
-                        <div class="card-header">Pending Invoice Report</div>
+                        <div class="card-header">Pending Perform Report</div>
                         <div class="card-body" style="padding: 17px 6px 17px 6px;">
                             <table id="reportTable"></table>
                         </div>
@@ -162,6 +167,7 @@ $(document).ready(function() {
         var companyId = $('#company_id').val();
         var startDate = $('#start_date').val();
         var endDate = $('#end_date').val();
+        var month = $('#month').val();
 
         $.ajax({
             url: '{{ route("fetch.data.company.inv") }}',
@@ -170,6 +176,7 @@ $(document).ready(function() {
                 company_id: companyId,
                 start_date: startDate,
                 end_date: endDate,
+                month: month,
                 _token: $('meta[name="csrf-token"]').attr('content') // Fetch CSRF token from meta tag
             },
             success: function(response) {

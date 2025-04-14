@@ -43,7 +43,7 @@
                                         <label class="small mb-1" for="inputFirstName">Company Name</label>
                                         <select class="form-control" id="company_id" name="company_id" required>
                                             <option value="">Select Company Name</option>
-                                            <!--<option value="">All Company Name</option>-->
+                                            <option value="">All Company Name</option>
                                             @foreach ($companies as $item)
                                                 <option value="{{ $item->id }}">{{ $item->companyname }}</option>
                                             @endforeach

@@ -38,7 +38,15 @@
                                 @csrf
                                 <!-- Form Row -->
                                 <div class="row gx-3 mb-3">
-                                    <!-- Form Group -->
+                                    {{-- <div class="col-6 col-md-4">
+                                        <label class="small mb-1" for="inputFirstName">Company Name</label>
+                                        <select class="form-control" id="company_id" name="company_id" required>
+                                            <option value="">Select Company Name</option>
+                                            @foreach ($companies as $item)
+                                                <option value="{{ $item->id }}">{{ $item->companyname }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div> --}}
                                     <div class="col-6 col-md-4">
                                         <label class="small mb-1" for="inputFirstName">Start Date</label>
                                         <input type="month" class="form-control" name="start_date" id="start_date">

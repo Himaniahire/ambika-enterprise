@@ -98,14 +98,13 @@ class PerformaController extends Controller
                 $statusColor = 'white'; // Default color
 
                 if ($item->performa_status == 'Complete') {
-                    $statusClass = 'status-complete';
-                    $statusColor = '#00ff00';
+                    $statusClass = 'bg-success'; // green
                 } elseif ($item->performa_status == 'Pending') {
-                    $statusClass = 'status-pending';
-                    $statusColor = 'yellow';
+                    $statusClass = 'bg-warning'; // yellow
                 } elseif ($item->performa_status == 'Cancel') {
-                    $statusClass = 'status-cancel';
-                    $statusColor = '#ff6868';
+                    $statusClass = 'bg-danger'; // red
+                } else {
+                    $statusClass = 'bg-secondary'; // fallback
                 }
 
                 $xlsButton = !empty($item->performa_no) ?
@@ -132,64 +131,71 @@ class PerformaController extends Controller
                     'sum_no' => $item->sum_no,
                     'invoice_no' => $item->invoice_no ?? 'N/A',
                     'gst_amount' => $item->gst_amount ?? '0.00',
-                    'status' => '<span class="status" style="background-color: ' . $statusColor . '; color: white; color: #000000;font-weight: 500;padding: 2px 7px 5px 7px;border-radius: 17px;">' . $item->performa_status . '</span>',
+                    'status' => '<div class="badge ' . $statusClass . ' rounded-pill">' . $item->performa_status . '</div>',
                     'performa_status' => '<input type="hidden" class="performa_status" value="' . $item->performa_status . '">',
                     'action' => '
-                        <ul class="list-unstyled hstack gap-1 mb-0">
-                            <li>' . $xlsButton . '</li>
-                            <li>' . $pdfButton . '</li>
-                            <li>
-                                <a href="#" class="btn btn-sm btn-soft-primary" type="button" data-bs-toggle="modal" data-bs-target="#editPerformaModal_' . $item->id . '">
-                                    <i data-feather="edit"></i>
-                                </a>
+                        <div class="dropdown">
+                            <a class="btn btn-sm btn-soft-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="border: none;">
+                                <i data-feather="settings"></i>
+                            </a>
+                            <ul class="dropdown-menu p-3">
+                                <div class="d-flex flex-wrap gap-2 justify-content-center">
+                                    <li>' . $xlsButton . '</li>
+                                    <li>' . $pdfButton . '</li>
+                                    <li>
+                                        <a href="#" class="btn btn-sm btn-soft-primary" type="button" data-bs-toggle="modal" data-bs-target="#editPerformaModal_' . $item->id . '">
+                                            <i data-feather="edit"></i>
+                                        </a>
 
-                                <div class="modal fade" id="editPerformaModal_' . $item->id . '" tabindex="-1" role="dialog" aria-labelledby="modalTitleEdit_' . $item->id . '" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered" role="document">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="modalTitleEdit_' . $item->id . '">Update Performa Details</h5>
-                                                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <form action="' . route('performa.update', $item->id) . '" method="POST">
-                                                    ' . csrf_field() . '
-                                                    ' . method_field('PUT') . '
-                                                    <div class="row gx-3 mb-3">
-                                                        <div class="col-6 col-md-6">
-                                                            <label class="small mb-1" for="performa_date_' . $item->id . '">Performa Date <span class="text-danger">*</span></label>
-                                                            <input class="form-control" id="performa_date_' . $item->id . '" type="text" name="performa_date" value="' . $item->performa_date . '" />
-                                                            <span id="error-performa-date-message" class="error"></span>
-                                                        </div>
-                                                        <div class="col-6 col-md-6">
-                                                            <label class="small mb-1" for="performa_no_' . $item->id . '">Performa No <span class="text-danger">*</span></label>
-                                                            <input class="form-control" id="performa_no_' . $item->id . '" type="text" name="performa_no" value="' . $item->performa_no . '"
-                                                                ' . (auth()->user()->role_id == 1 ? '' : 'readonly') . '/>
-                                                        </div>
+                                        <div class="modal fade" id="editPerformaModal_' . $item->id . '" tabindex="-1" role="dialog" aria-labelledby="modalTitleEdit_' . $item->id . '" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="modalTitleEdit_' . $item->id . '">Update Performa Details</h5>
+                                                        <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
                                                     </div>
-                                                    <button class="btn btn-primary" type="submit">Update Performa</button>
-                                                </form>
+                                                    <div class="modal-body">
+                                                        <form action="' . route('performa.update', $item->id) . '" method="POST">
+                                                            ' . csrf_field() . '
+                                                            ' . method_field('PUT') . '
+                                                            <div class="row gx-3 mb-3">
+                                                                <div class="col-6 col-md-6">
+                                                                    <label class="small mb-1" for="performa_date_' . $item->id . '">Performa Date <span class="text-danger">*</span></label>
+                                                                    <input class="form-control" id="performa_date_' . $item->id . '" type="text" name="performa_date" value="' . $item->performa_date . '" />
+                                                                    <span id="error-performa-date-message" class="error"></span>
+                                                                </div>
+                                                                <div class="col-6 col-md-6">
+                                                                    <label class="small mb-1" for="performa_no_' . $item->id . '">Performa No <span class="text-danger">*</span></label>
+                                                                    <input class="form-control" id="performa_no_' . $item->id . '" type="text" name="performa_no" value="' . $item->performa_no . '"
+                                                                        ' . (auth()->user()->role_id == 1 ? '' : 'readonly') . '/>
+                                                                </div>
+                                                            </div>
+                                                            <button class="btn btn-primary" type="submit">Update Performa</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </li>
+                                    <li>
+                                        <form action="' . route('performa.destroy', $item->id) . '" method="POST">
+                                            ' . csrf_field() . '
+                                            ' . method_field('DELETE') . '
+                                            <button type="submit" class="btn btn-sm btn-soft-danger" style="padding-left: 22px;" onclick="return confirm(\'Are you sure you want to delete this item?\');" style="border: none; background: transparent; padding: 0px;">
+                                                <i data-feather="trash-2"></i>
+                                            </button>
+                                        </form>
+                                    </li>
+                                    <li>
+                                        <button type="submit" style="border: none; background: transparent; padding: 0px" onclick="return confirm(\'Are you sure you want to cancel this item?\');">
+                                            <a class="btn btn-sm btn-soft-danger" href="' . route('performa.cancel', $item->id) . '">
+                                                <i data-feather="x-circle"></i>
+                                            </a>
+                                        </button>
+                                    </li>
                                 </div>
-                            </li>
-                            <li>
-                                <form action="' . route('performa.destroy', $item->id) . '" method="POST">
-                                    ' . csrf_field() . '
-                                    ' . method_field('DELETE') . '
-                                    <button type="submit" class="btn btn-sm btn-soft-danger" style="padding-left: 22px;" onclick="return confirm(\'Are you sure you want to delete this item?\');" style="border: none; background: transparent; padding: 0px;">
-                                        <i data-feather="trash-2"></i>
-                                    </button>
-                                </form>
-                            </li>
-                            <li>
-                                <button type="submit" style="border: none; background: transparent; padding: 0px" onclick="return confirm(\'Are you sure you want to cancel this item?\');">
-                                    <a class="btn btn-sm btn-soft-danger" href="' . route('performa.cancel', $item->id) . '">
-                                        <i data-feather="x-circle"></i>
-                                    </a>
-                                </button>
-                            </li>
-                        </ul>
+                            </ul>
+                        </div>
                     ',
                 ];
             }
