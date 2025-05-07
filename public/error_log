@@ -1,1 +1,2 @@
 [23-Aug-2024 04:43:47 UTC] PHP Fatal error:  Array and string offset access syntax with curly braces is no longer supported in /home3/ambiksom/admin.ambikaenterprise.net/app/Http/Controllers/PerformaController.php on line 65
+[21-Apr-2025 12:18:21 UTC] PHP Fatal error:  Class App\Exports\TableExport contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (Maatwebsite\Excel\Concerns\WithStyles::styles) in /home3/ambiksom/admin.ambikaenterprise.net/app/Exports/TableExport.php on line 12

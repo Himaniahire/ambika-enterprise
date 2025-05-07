@@ -14,6 +14,7 @@ use App\Models\Employee;
 use Carbon\Carbon;
 use DataTables;
 use PDF;
+use Log;
 
 class DataEntryController extends Controller
 {
@@ -90,32 +91,34 @@ class DataEntryController extends Controller
     {
         $month = $request->input('month');
         $company_id = $request->input('company_id');
-        $exportType = $request->input('export_type'); // Get the export type from the form
+        $exportType = $request->input('export_type');
+        // $data = EmployeeSalary::where('salary_month', $month)
+        // ->where('com_id', $company_id)
+        // ->get();
+        // dd($data);
 
-        // Basic input validation
         if (empty($month)) {
             return redirect()->back()->withInput()->withErrors('Month and year are required.');
         }
 
-        // Parse the selected month and year
-        $monthDate = \Carbon\Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+        $monthDate = Carbon::createFromFormat('Y-m', $month)->format('Y-m');
 
-        // Query based on month, year, and optionally company_id
+        // Query with relationships and filters
         $query = EmployeeSalary::with(['getEmployee', 'getEmployee.getEmployeePost'])
-            ->where('salary_month', '>=', $monthDate);
+            ->where('salary_month', $monthDate);
 
         if (!empty($company_id)) {
             $query->where('com_id', $company_id);
         }
 
         $salaries = $query->get()->map(function($salary) {
-            // Calculate the total advance amount for the employee
+            // Sum advance salary per employee
             $totalAdvance = EmployeeAdvanceSalary::where('emp_id', $salary->emp_id)->sum('advance_amount');
             $salary->total_advance = $totalAdvance;
             return $salary;
         });
 
-        // Fetch the company name using the company_id
+        // Get company name if selected
         $companyName = $company_id ? RegisterCompany::where('id', $company_id)->value('companyname') : null;
 
         $data = [

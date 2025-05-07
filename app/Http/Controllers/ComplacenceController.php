@@ -219,16 +219,15 @@ class ComplacenceController extends Controller
         return redirect()->route('complacences.index')->with('success', 'Complacence and its documents deleted successfully.');
     }
 
-    public function destroyDoc($id)
+    public function deleteDoc($id)
     {
         $document = ComplacenceDocument::findOrFail($id);
 
-        // Optionally delete the file from storage
         if (file_exists(public_path($document->document))) {
             unlink(public_path($document->document));
         }
 
-        $document->delete();
+        // $document->delete();
 
         return redirect()->back()->with('success', 'Document deleted successfully.');
     }

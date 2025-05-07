@@ -112,51 +112,15 @@
 
         <div class="card">
             <div class="card-body">
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <ul>
-                            @error('invoice_id')
-                                <li class="text-danger">{{ $message }}</li>
-                            @enderror
-                        </ul>
-                    </div>
-                @endif
-                <table id="myTable" style="font-size: 14px;border: 1px solid #ddd;" class="table table-bordered table-striped">
-                    <thead>
-                        <tr>
-                            <th>Sr. No.</th>
-                            <th>Company Name</th>
-                            <th>Summary No</th>
-                            <th>Performa No</th>
-                            <th>PO No</th>
-                            <th>Total Rs.</th>
-                        </tr>
-                    </thead>
-                    <tfoot>
-                        <tr>
-                            <th>Sr. No.</th>
-                            <th>Company Name</th>
-                            <th>Summary No</th>
-                            <th>Performa No</th>
-                            <th>PO No</th>
-                            <th>Total Rs.</th>
-                        </tr>
-                    </tfoot>
-                    <tbody>
-                        @foreach($Performa as $key => $value)
-                        <tr>
-                            <td>{{ $key+1 }}</td>
-                            <td>{{ $value->getCompany->companyname }}</td>
-                            <td>{{ $value->sum_no }}</td>
-                            <td>{{ $value->performa_no }}</td>
-                            <td>{{ $value->getPO->po_no ?? 'N/A' }}</td>
-                            <td>{{ $value->price_total }}</td>
-                            <td>{{ $value->gst_amount }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                    {{ $Performa->links() }}
-                </table>
+                @php
+                    $totalWithTax = 0;
+                    $totalWithoutTax = 0;
+                    $pendingWithTax = 0;
+                    $pendingWithoutTax = 0;
+                @endphp
+                <a href="{{ route('export.excel') }}" class="btn btn-primary">Excel</a>
+                <a href="{{ route('export.pdf') }}" class="btn btn-primary">PDF</a>
+                @include('admin.table')
             </div>
         </div>
     </div>
@@ -166,27 +130,6 @@
 
 
 @section('footer-scripts')
-
-<script>
-    $(document).ready(function () {
-        $('#myTable').DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: "{{ route('adminhome') }}"
-            },
-            columns: [
-                { data: 'id', name: 'id' },
-                { data: 'companyname', name: 'register_companies.companyname' },
-                { data: 'sum_no', name: 'summaries.sum_no' },
-                { data: 'performa_no', name: 'summaries.performa_no' },
-                { data: 'po_no_id', name: 'summaries.po_no_id' },
-                { data: 'price_total', name: 'summaries.price_total' },
-                { data: 'gst_amount', name: 'summaries.gst_amount' },
-            ]
-        });
-    });
-</script>
 
 
 @endsection

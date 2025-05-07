@@ -8,19 +8,102 @@ use App\Models\Summary;
 use App\Models\PurchaseOrder;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
+use Carbon\Carbon;
+use App\Models\RegisterCompany;
+use App\Exports\TableExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AdminController extends Controller
 {
     public function index(Request $request)
     {
-        $invoice = Summary::whereNotNull('invoice_no')->count();
-        $performa = Summary::whereNotNull('performa_no')->count();
+        $invoice = Summary::whereNotNull('invoice_no')->where('invoice_status', '!=', 'Cancel')->count();
+        $performa = Summary::whereNotNull('performa_no')->where('performa_status', '!=', 'Cancel')->count();
         $po = PurchaseOrder::count();
-        $Pendingperforma = Summary::whereNull('invoice_no')->count();
-        $Performa = Summary::whereNull('invoice_no')->with('getCompany','getPO')->simplePaginate('10');
+        $Pendingperforma = Summary::whereNull('invoice_no')->where('invoice_status', '!=', 'Cancel')->where('performa_status', '!=', 'Cancel')->count();
+        $companies = RegisterCompany::whereHas('summaries', function ($query) {
+            $query->where('invoice_status', '!=', 'Cancel')
+                  ->where('performa_status', '!=', 'Cancel');
+        })->with(['summaries' => function ($query) {
+            $query->where('invoice_status', '!=', 'Cancel')
+                  ->where('performa_status', '!=', 'Cancel')
+                  ->select('company_id', 'price_total', 'gst_amount', 'invoice_no', 'performa_no');
+        }])->get();
 
-        return view('admin.index', compact('invoice', 'performa', 'po', 'Pendingperforma','Performa'));
+
+        $data = [];
+
+        foreach ($companies as $index => $company) {
+            $totalWithTax = $company->summaries->whereNotNull('performa_no')->where('invoice_status', '!=', 'Cancel')
+            ->where('performa_status', '!=', 'Cancel')->sum('gst_amount');
+            $totalWithoutTax = $company->summaries->whereNotNull('performa_no')->where('invoice_status', '!=', 'Cancel')
+            ->where('performa_status', '!=', 'Cancel')->sum('price_total');
+
+            $pendingWithTax = $company->summaries->whereNotNull('invoice_no')->where('invoice_status', '!=', 'Cancel')
+            ->where('performa_status', '!=', 'Cancel')->sum('gst_amount');
+            $pendingWithoutTax = $company->summaries->whereNotNull('invoice_no')->where('invoice_status', '!=', 'Cancel')
+            ->where('performa_status', '!=', 'Cancel')->sum('price_total');
+
+            $data[] = [
+                'sr_no' => $index + 1,
+                'company_name' => $company->companyname,
+                'total_with_tax' => number_format($totalWithTax, 2),
+                'total_without_tax' => number_format($totalWithoutTax, 2),
+                'pending_with_tax' => number_format($pendingWithTax, 2),
+                'pending_without_tax' => number_format($pendingWithoutTax, 2),
+            ];
+        }
+
+        // return response()->json(['data' => $data]);
+
+        return view('admin.index', compact('invoice', 'performa', 'po', 'Pendingperforma','data'));
     }
+    public function exportExcel()
+    {
+        return Excel::download(new TableExport, 'company_summary.xlsx');
+    }
+
+    public function exportPDF()
+    {
+        $companies = RegisterCompany::whereHas('summaries', function ($query) {
+            $query->where('invoice_status', '!=', 'Cancel')
+                  ->where('performa_status', '!=', 'Cancel');
+        })->with(['summaries' => function ($query) {
+            $query->where('invoice_status', '!=', 'Cancel')
+                  ->where('performa_status', '!=', 'Cancel')
+                  ->select('company_id', 'price_total', 'gst_amount', 'invoice_no', 'performa_no');
+        }])->get();
+
+
+        $data = [];
+
+        foreach ($companies as $index => $company) {
+            $totalWithTax = $company->summaries->whereNotNull('performa_no')->where('invoice_status', '!=', 'Cancel')
+            ->where('performa_status', '!=', 'Cancel')->sum('gst_amount');
+            $totalWithoutTax = $company->summaries->whereNotNull('performa_no')->where('invoice_status', '!=', 'Cancel')
+            ->where('performa_status', '!=', 'Cancel')->sum('price_total');
+
+            $pendingWithTax = $company->summaries->whereNotNull('invoice_no')->where('invoice_status', '!=', 'Cancel')
+            ->where('performa_status', '!=', 'Cancel')->sum('gst_amount');
+            $pendingWithoutTax = $company->summaries->whereNotNull('invoice_no')->where('invoice_status', '!=', 'Cancel')
+            ->where('performa_status', '!=', 'Cancel')->sum('price_total');
+
+            $data[] = [
+                'sr_no' => $index + 1,
+                'company_name' => $company->companyname,
+                'total_with_tax' => number_format($totalWithTax, 2),
+                'total_without_tax' => number_format($totalWithoutTax, 2),
+                'pending_with_tax' => number_format($pendingWithTax, 2),
+                'pending_without_tax' => number_format($pendingWithoutTax, 2),
+            ];
+        }
+
+        // 👇 Make sure to pass as ['data' => $data] matching the view
+        $pdf = PDF::loadView('admin.table', ['data' => $data]);
+        return $pdf->download('company_summaries.pdf');
+    }
+
 
     public function getChartData()
     {
@@ -30,9 +113,12 @@ class AdminController extends Controller
             5 => "May", 6 => "June", 7 => "July", 8 => "Aug",
             9 => "Sept", 10 => "Oct", 11 => "Nov", 12 => "Dec"
         ];
+        
+        $currentYear = Carbon::now()->year;
 
-        // Performa data
         $data = DB::table('summaries')
+            ->where('invoice_status', '!=', 'Cancel')
+            ->where('performa_status', '!=', 'Cancel')
             ->select(
                 DB::raw('MONTH(performa_date) as month'),
                 DB::raw('SUM(gst_amount) as total_gst')
@@ -41,9 +127,13 @@ class AdminController extends Controller
             ->get()
             ->keyBy('month');
 
+        
         // Invoice data
         $dataInv = DB::table('summaries')
             ->whereNotNull('invoice_date')
+            ->whereYear('invoice_date', $currentYear)
+            ->where('invoice_status', '!=', 'Cancel')
+            ->where('performa_status', '!=', 'Cancel')
             ->select(
                 DB::raw('MONTH(invoice_date) as month'),
                 DB::raw('SUM(gst_amount) as total_gst')
@@ -51,6 +141,17 @@ class AdminController extends Controller
             ->groupBy(DB::raw('MONTH(invoice_date)'))
             ->get()
             ->keyBy('month');
+            
+        $dataPendPerforma = DB::table('summaries')
+            ->whereNull('invoice_no')
+            ->whereYear('performa_date', $currentYear)
+            ->where('invoice_status', '!=', 'Cancel')
+            ->where('performa_status', '!=', 'Cancel')
+            ->selectRaw('MONTH(performa_date) as month, SUM(gst_amount) as total_gst, COUNT(*) as total_count')
+            ->groupByRaw('MONTH(performa_date)')
+            ->get()
+            ->keyBy('month');
+
 
         // Max GST value
         $max = DB::table('summaries')
@@ -62,11 +163,13 @@ class AdminController extends Controller
         $labels = [];
         $gstperValues = [];
         $gstinvValues = [];
+        $gstpenperValues = [];
 
         foreach ($monthNames as $monthNum => $monthLabel) {
             $labels[] = $monthLabel;
             $gstperValues[] = isset($data[$monthNum]) ? $data[$monthNum]->total_gst : 0;
             $gstinvValues[] = isset($dataInv[$monthNum]) ? $dataInv[$monthNum]->total_gst : 0;
+            $gstpenperValues[] = isset($dataPendPerforma[$monthNum]) ? $dataPendPerforma[$monthNum]->total_gst : 0;
         }
 
         return response()->json([
@@ -87,6 +190,14 @@ class AdminController extends Controller
                     'hoverBackgroundColor' => '#00ac69',
                     'borderColor' => '#1cc88a',
                     'data' => $gstinvValues,
+                    'maxBarThickness' => 25,
+                ],
+                [
+                    'label' => 'Pending Performa',
+                    'backgroundColor' => '#00cfd5',
+                    'hoverBackgroundColor' => '#00cfd5',
+                    'borderColor' => '#1cc88a',
+                    'data' => $gstpenperValues,
                     'maxBarThickness' => 25,
                 ],
             ]

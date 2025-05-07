@@ -30,12 +30,15 @@ Route::group(['prefix' => '/admin','middleware' => ['auth','isAdmin']], function
     Route::controller(App\Http\Controllers\AdminController::class)->group(function () {
         Route::get('/', 'index')->name('adminhome');
         Route::get('/activity_log', 'activityLog')->name('activity_log.index');
+        Route::get('/export-excel',  'exportExcel')->name('export.excel');
+        Route::get('/export-pdf', 'exportPDF')->name('export.pdf');
+
 
         // Route::get('/admin_password_changes', 'adminPasswordChange')->name('password.changes');
     });
 
     Route::resource('/complacences', App\Http\Controllers\ComplacenceController::class);
-    Route::delete('/complacences/{id}', [App\Http\Controllers\ComplacenceController::class, 'destroyDoc'])->name('complacences.destroyDoc');
+    Route::delete('/complacences/{id}', [App\Http\Controllers\ComplacenceController::class, 'deleteDoc'])->name('complacences.deleteDoc');
 
     Route::controller(App\Http\Controllers\UserController::class)->group(function () {
         Route::get('user', 'index')->name('user.index');
@@ -222,6 +225,7 @@ Route::group(['prefix' => 'admin/employee','middleware' => ['auth','isDataEntry'
         Route::get('/employee_attendance/attendance_edit', 'attendanceEdit')->name('employee_attendance.attendance_edit');
         Route::get('/get-employee-details/{companyId}', 'getEmployeeDetails')->name("get.employee.details");
         Route::get('/attendance/check', 'checkAttendance')->name('attendance.check');
+        Route::get('/employee-attendance/fetch', 'fetchAttendance')->name('employee_attendance.fetch');
     });
 
 });

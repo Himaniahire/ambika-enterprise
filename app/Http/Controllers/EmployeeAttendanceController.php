@@ -9,7 +9,7 @@ use App\Models\RegisterCompany;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\DataTables;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class EmployeeAttendanceController extends Controller
 {
@@ -22,14 +22,14 @@ class EmployeeAttendanceController extends Controller
     //     $employeeAttendances = EmployeeAttendance::whereDate('attendance_date', $today)->get();
     //     return view('admin.employee.employee_attendance.index', compact('employeeAttendances'));
     // }
-    
+
     public function index(Request $request)
     {
         if ($request->ajax()) {
             $yesterday = Carbon::yesterday();
             $query = EmployeeAttendance::whereDate('attendance_date', $yesterday)
                 ->with(['getEmployee', 'getCompany']);
-    
+
             return DataTables::of($query)
     ->addIndexColumn() // ✅ This adds DT_RowIndex automatically
     ->addColumn('employee_name', function ($employee) {
@@ -65,7 +65,7 @@ class EmployeeAttendanceController extends Controller
     ->make(true);
 
         }
-    
+
         return view('admin.employee.employee_attendance.index');
     }
 
@@ -74,7 +74,7 @@ class EmployeeAttendanceController extends Controller
         $employees = Employee::where('company_id', $companyId)->where('status','=' ,'1')->get();
         return response()->json($employees);
     }
-    
+
     public function checkAttendance(Request $request)
     {
         $companyId = $request->input('company_id');
@@ -88,6 +88,8 @@ class EmployeeAttendanceController extends Controller
 
         return response()->json(['dates' => $attendanceDates]);
     }
+
+
 
     /**
      * Show the form for creating a new resource.
@@ -109,39 +111,48 @@ class EmployeeAttendanceController extends Controller
         return $employees;
     }
 
+    public function fetchAttendance(Request $request)
+    {
+        $attendances = DB::table('employee_attendances')
+            ->where('company_id', $request->company_id)
+            ->where('attendance_date', $request->attendance_date)
+            ->get();
+
+        return response()->json([
+            'attendance' => $attendances
+        ]);
+    }
+
+
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
+        // dd($request->all());
         $companyId = $request->input('company_id');
         $attendanceDate = $request->input('stored_date');
         $statuses = $request->input('status');
         $presentOvertimes = $request->input('present_over_time', []);
         $halfdayOvertimes = $request->input('half_day_over_time', []);
         $holidayOvertimes = $request->input('holiday_over_time', []);
-
-        // Check if the attendance date is a Sunday
         $isSunday = Carbon::parse($attendanceDate)->isSunday();
 
         foreach ($statuses as $employeeId => $status) {
-            // Fetch employee data to check income_type
             $employee = Employee::find($employeeId);
 
             if (!$employee) {
-                continue; // Skip if employee not found
+                continue;
             }
+            $status = isset($statuses[$employeeId]) ? (int) $statuses[$employeeId] : 0;
 
-            // Check if an attendance record already exists for this employee on the specified attendance date
             $existingAttendance = EmployeeAttendance::where('attendance_date', $attendanceDate)
                 ->where('emp_id', $employeeId)
                 ->first();
 
-            // Determine the over_time value based on status
             $overTimeValue = $this->calculateOverTime($status, $presentOvertimes, $halfdayOvertimes, $holidayOvertimes, $employeeId);
 
-            // Determine what to save based on conditions
             $saveData = [
                 'company_id' => $companyId,
                 'attendance_date' => $attendanceDate,
@@ -150,7 +161,6 @@ class EmployeeAttendanceController extends Controller
                 'over_time' => $overTimeValue,
             ];
 
-            // Handle specific cases for Sunday and non-Sunday
             if ($isSunday) {
                 $this->handleSundayAttendance($employee, $existingAttendance, $saveData);
             } else {
@@ -158,11 +168,43 @@ class EmployeeAttendanceController extends Controller
             }
         }
 
+
+        $employees = Employee::where('company_id', $companyId)->get();
+
+        foreach ($employees as $employee) {
+            $employeeId = $employee->id;
+
+            // Use submitted status or default to 0 (absent)
+            $status = isset($statuses[$employeeId]) ? (int) $statuses[$employeeId] : 0;
+
+            $existingAttendance = EmployeeAttendance::where('attendance_date', $attendanceDate)
+                ->where('emp_id', $employeeId)
+                ->first();
+
+            $overTimeValue = $this->calculateOverTime($status, $presentOvertimes, $halfdayOvertimes, $holidayOvertimes, $employeeId);
+
+            $saveData = [
+                'company_id' => $companyId,
+                'attendance_date' => $attendanceDate,
+                'emp_id' => $employeeId,
+                'status' => $status,
+                'over_time' => $overTimeValue,
+            ];
+
+            if ($isSunday) {
+                $this->handleSundayAttendance($employee, $existingAttendance, $saveData);
+            } else {
+                $this->handleNonSundayAttendance($existingAttendance, $saveData);
+            }
+        }
+
+
         return response()->json(['message' => 'Attendance saved successfully!']);
     }
 
     private function calculateOverTime($status, $presentOvertimes, $halfdayOvertimes, $holidayOvertimes, $employeeId)
     {
+        $status = (int) $status;
         $overTimeValue = 0;
 
         switch ($status) {
@@ -271,7 +313,7 @@ class EmployeeAttendanceController extends Controller
         $presentOvertimes = $request->input('present_over_time', []);
         $halfdayOvertimes = $request->input('half_day_over_time', []);
         $holidayOvertimes = $request->input('holiday_over_time', []);
-        
+
         if (empty($statuses)) {
             return redirect()->back()->with('error', 'No Data Found');
         }
@@ -330,7 +372,7 @@ class EmployeeAttendanceController extends Controller
 
 
     }
-    
+
     /**
      * Remove the specified resource from storage.
      */

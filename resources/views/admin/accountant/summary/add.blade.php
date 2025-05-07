@@ -80,7 +80,7 @@
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
-                                    <div class="col-4 col-md-3">
+                                    {{-- <div class="col-4 col-md-3">
                                         <label class="small mb-1" for="inputFirstName">Summary No <span class="text-danger">*</span></label>
                                         <input type="text" id="sum_no" name="sum_no" class="form-control" value=""
                                         @if(auth()->user()->role_id == 1)
@@ -88,7 +88,7 @@
                                     @else
                                         readonly
                                     @endif placeholder="Summary No" />
-                                    </div>
+                                    </div> --}}
                                     <div class="col-4 col-md-3">
                                         <label class="small mb-1" for="inputFirstName">Company Unit</label>
                                         <input type="text" name="com_unit" class="form-control" value=""

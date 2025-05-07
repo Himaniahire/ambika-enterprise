@@ -144,6 +144,12 @@ class EmployeeController extends Controller
             'emp_photo' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             'police_verification' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
+
+        $company_id = null;
+
+        if ($request->emp_type === 'Office Employee') {
+            $company_id = 22;
+        }
         $employee = new Employee([
             "emp_code" => $request->emp_code,
             "emp_post_id" => $request->emp_post_id,
@@ -168,6 +174,7 @@ class EmployeeController extends Controller
             "income_type" => $request->income_type,
             "income" => $request->income,
             "emp_type" => $request->emp_type,
+            "company_id" => $company_id,
         ]);
         $employee->save();
 

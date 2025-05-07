@@ -84,28 +84,28 @@
                     <a class="nav-link" href="{{ route('employee_holidays.index') }}">
                         <div class="nav-link-icon"><img src="{{ asset('admin_assets/sidebar_icon/holiday.png') }}"
                                 alt="dashbord" style="width: 30px;"></div>
-                        Employee Holidays
+                        Holidays
                     </a>
                 @endif
                 @if(Auth::user()->permission->contains('name', 'employee_categories'))
                     <a class="nav-link" href="{{ route('employee_categories.index') }}">
                         <div class="nav-link-icon"><img src="{{ asset('admin_assets/sidebar_icon/list.png') }}"
                                 alt="dashbord" style="width: 30px;"></div>
-                        Employee Categories
+                        Categories
                     </a>
                 @endif
                 @if(Auth::user()->permission->contains('name', 'employee_posts'))
                     <a class="nav-link" href="{{ route('employee_posts.index') }}">
                         <div class="nav-link-icon"><img src="{{ asset('admin_assets/sidebar_icon/business.png') }}"
                                 alt="dashbord" style="width: 30px;"></div>
-                        Employee Post
+                        Post
                     </a>
                 @endif
                 @if(Auth::user()->permission->contains('name', 'employee_advance_salary'))
                     <a class="nav-link" href="{{ route('employee_advance_salary.index') }}">
                         <div class="nav-link-icon"><img src="{{ asset('admin_assets/sidebar_icon/salary.png') }}"
                                 alt="dashbord" style="width: 30px;"></div>
-                        Employee Advance Salary
+                        Advance Salary
                     </a>
                 @endif
                 @if(Auth::user()->permission->contains('name', 'employee_details'))
@@ -136,20 +136,25 @@
                     <div class="collapse" id="collapseEmployeeAttendance" data-bs-parent="#accordionSidenav">
                         <nav class="sidenav-menu-nested nav">
                             @if(Auth::user()->permission->contains('name', 'employee_company_transfer'))
-                                <a class="nav-link" href="{{ route('employee_company_transfer.index') }}">Employee Company
+                                <a class="nav-link" href="{{ route('employee_company_transfer.index') }}">Company
                                     Transfer</a>
                             @endif
-                            <a class="nav-link" href="{{ route('employee_attendance.create') }}">Add Employee
+                            <a class="nav-link" href="{{ route('employee_attendance.create') }}">Add/Edit
                                 Attendance</a>
-                            <a class="nav-link" href="{{ route('employee_attendance.index') }}">Employee Attendance
+                            {{-- <a class="nav-link" href="{{ route('employee_attendance.index') }}">Employee Attendance
                                 List</a>
                             <a class="nav-link" href="{{ route('employee_attendance.attendance_edit') }}">Edit Employee
-                                Attendance</a>
+                                Attendance</a> --}}
                         </nav>
                     </div>
                 @endif
                 @if(Auth::user()->permission->contains('name', 'employee_salary'))
-                    <a class="nav-link collapsed" href="javascript:void(0);" data-bs-toggle="collapse"
+                    <a class="nav-link" href="{{ route('employee_salary.create') }}">
+                        <div class="nav-link-icon"><img src="{{ asset('admin_assets/sidebar_icon/salary-1.png') }}"
+                                alt="dashbord" style="width: 30px;"></div>
+                        Generate Salary
+                    </a>
+                    {{-- <a class="nav-link collapsed" href="javascript:void(0);" data-bs-toggle="collapse"
                         data-bs-target="#collapseEmployeeSalary" aria-expanded="false"
                         aria-controls="collapseEmployeeSalary">
                         <div class="nav-link-icon"><img src="{{ asset('admin_assets/sidebar_icon/salary-1.png') }}"
@@ -159,12 +164,9 @@
                     </a>
                     <div class="collapse" id="collapseEmployeeSalary" data-bs-parent="#accordionSidenav">
                         <nav class="sidenav-menu-nested nav">
-                            {{-- <a class="nav-link" href="{{ route('employee_company_transfer.index') }}">Employee Company Transfer</a> --}}
                             <a class="nav-link" href="{{ route('employee_salary.create') }}">Create Employee Salary</a>
-                            {{-- <a class="nav-link" href="{{ route('employee_attendance.index') }}">Employee Attendance List</a>
-                        <a class="nav-link" href="{{ route('employee_attendance.attendance_edit') }}">Edit Employee Attendance</a> --}}
                         </nav>
-                    </div>
+                    </div> --}}
                 @endif
                 @if(Auth::user()->permission->contains('name', 'emp_reports'))
                     <a class="nav-link collapsed" href="javascript:void(0);" data-bs-toggle="collapse"
@@ -194,15 +196,11 @@
                         <div class="nav-link-icon"><img src="{{asset('admin_assets/sidebar_icon/menu.png')}}" alt="dashbord" style="width: 23px;"></div>
                         User Register
                     </a>
-                @endif
-
-                <div class="sidenav-menu-heading">User</div>
-                {{-- @if(Auth::user()->permission->contains('name', 'users')) --}}
                     <a class="nav-link collapsed" href="{{ route('complacences.index') }}">
                         <div class="nav-link-icon"><img src="{{asset('admin_assets/sidebar_icon/menu.png')}}" alt="dashbord" style="width: 23px;"></div>
                         Complacence
                     </a>
-                {{-- @endif --}}
+                @endif
             </div>
         </div>
         <!-- Sidenav Footer-->

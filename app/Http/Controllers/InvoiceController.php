@@ -75,7 +75,7 @@ class InvoiceController extends Controller
             if ($request->has('start_date') && $request->has('end_date')) {
                 $query->whereBetween('invoice_date', [$request->start_date, $request->end_date]);
             }
-            
+
             $search = trim($search);
 
             if (!empty($search)) {
@@ -95,6 +95,8 @@ class InvoiceController extends Controller
 
             $totalData = $query->count();
             $totalFiltered = $totalData;
+            $totalPriceAmount = 0;
+            $totalGstAmount = 0;
 
             $invoices = $query->offset($start)
                 ->limit($limit)
@@ -139,6 +141,8 @@ class InvoiceController extends Controller
                 : '<a href="javascript:void(0);" class="btn btn-sm btn-soft-danger" onclick="showToastrMessage(\'Invoice not available\')">
                     <i data-feather="file-text"></i>
                 </a>';
+                $totalPriceAmount += (float) $invoice->total;
+                $totalGstAmount += (float) $invoice->gst_amount;
 
                 $data[] = [
                     'DT_RowIndex' => $i++,
@@ -154,94 +158,21 @@ class InvoiceController extends Controller
                     'invoice_status' => '<input type="hidden" class="invoice_status" value="' . $invoice->invoice_status . '">',
                     'action' => '
                         <div class="dropdown">
-                            <a class="btn btn-sm btn-soft-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="border: none;">
+                            <button class="btn btn-sm btn-soft-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="border: none;">
                                 <i data-feather="settings"></i>
-                            </a>
+                            </button>
                             <ul class="dropdown-menu p-3">
                                 <div class="d-flex flex-wrap gap-2 justify-content-center">
                                     <li>' . $xlsButton . '</li>
                                     <li>' . $pdfButton . '</li>
-                                    <li>
-                                        <a href="#" class="btn btn-sm btn-soft-primary" type="button" data-bs-toggle="modal" data-bs-target="#completeInvoiceModal_' . $invoice->id . '">
+                                    <li><a href="#" class="btn btn-sm btn-soft-primary" type="button" data-bs-toggle="modal" data-bs-target="#completeInvoiceModal_' . $invoice->id . '">
                                             <i data-feather="check"></i>
                                         </a>
-
-                                        <div class="modal fade" id="completeInvoiceModal_' . $invoice->id . '" tabindex="-1" role="dialog" aria-labelledby="modalTitle_' . $invoice->id . '" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-centered" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="modalTitle_' . $invoice->id . '">Complete Invoice Details</h5>
-                                                        <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <form action="' . route('complete.invoice') . '" method="POST" enctype="multipart/form-data">
-                                                            ' . csrf_field() . '
-                                                            <div class="row gx-3 mb-3">
-                                                                <input type="hidden" name="invoice_no" value="' . $invoice->invoice_no . '">
-                                                                <input type="hidden" name="invoice_id" value="' . $invoice->id . '" />
-                                                                <div class="col-6 col-md-6">
-                                                                    <label class="small mb-1" for="tds_' . $invoice->id . '">TDS</label>
-                                                                    <input class="form-control" id="tds_' . $invoice->id . '" type="text" name="tds" value="" />
-                                                                </div>
-                                                                <div class="col-6 col-md-6">
-                                                                    <label class="small mb-1" for="retention_' . $invoice->id . '">Retention</label>
-                                                                    <input class="form-control" id="retention_' . $invoice->id . '" type="text" name="retention" value="" />
-                                                                </div>
-                                                                <div class="col-6 col-md-6">
-                                                                    <label class="small mb-1" for="payment_receive_date_' . $invoice->id . '">Payment Receive Date</label>
-                                                                    <input class="form-control" id="payment_receive_date_' . $invoice->id . '" type="date" name="payment_receive_date" value="" />
-                                                                </div>
-                                                                <div class="col-6 col-md-6">
-                                                                    <label class="small mb-1" for="payment_' . $invoice->id . '">Payment</label>
-                                                                    <input class="form-control" id="payment_' . $invoice->id . '" type="text" name="payment" value=""/>
-                                                                </div>
-                                                                <div class="col-6 col-md-6">
-                                                                    <label class="small mb-1" for="penalty_' . $invoice->id . '">Penalty</label>
-                                                                    <input class="form-control" id="penalty_' . $invoice->id . '" type="text" name="penalty" value=""/>
-                                                                </div>
-                                                            </div>
-                                                            <button class="btn btn-primary" type="submit">Add Complete Invoice</button>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
                                     </li>
                                     <li>
                                         <a href="#" class="btn btn-sm btn-soft-primary" type="button" data-bs-toggle="modal" data-bs-target="#editInvoiceModal_' . $invoice->id . '">
                                             <i data-feather="edit"></i>
                                         </a>
-
-                                        <div class="modal fade" id="editInvoiceModal_' . $invoice->id . '" tabindex="-1" role="dialog" aria-labelledby="modalTitleEdit_' . $invoice->id . '" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-centered" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="modalTitleEdit_' . $invoice->id . '">Generate Invoice Details</h5>
-                                                        <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <form action="' . route('invoice.update', $invoice->id) . '" method="POST">
-                                                            ' . csrf_field() . '
-                                                            ' . method_field('PUT') . '
-                                                            <div class="row gx-3 mb-3">
-                                                                <div class="col-6 col-md-6">
-                                                                    <input type="hidden" name="company_id" value="' . $invoice->company_id . '">
-                                                                    <label class="small mb-1" for="invoice_date_' . $invoice->id . '">Invoice Date <span class="text-danger">*</span></label>
-                                                                    <input class="form-control" id="invoice_date_' . $invoice->id . '" type="date" name="invoice_date" value="' . $invoice->invoice_date . '" />
-                                                                    <span id="error-invoice-date-message" class="error"></span>
-                                                                </div>
-                                                                <div class="col-6 col-md-6">
-                                                                    <label class="small mb-1" for="invoice_no_' . $invoice->id . '">Invoice No <span class="text-danger">*</span></label>
-                                                                    <input class="form-control" id="invoice_no_' . $invoice->id . '" type="text" name="invoice_no" value="' . $invoice->invoice_no . '"
-                                                                        ' . (auth()->user()->role_id == 1 ? '' : 'readonly') . ' />
-                                                                </div>
-                                                            </div>
-                                                            <button class="btn btn-primary" type="submit">Update Invoice</button>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
                                     </li>
                                     <li>
                                         <form action="' . route('invoice.destroy', $invoice->id) . '" method="POST">
@@ -262,6 +193,77 @@ class InvoiceController extends Controller
                                 </div>
                             </ul>
                         </div>
+                        <div class="modal fade" id="completeInvoiceModal_' . $invoice->id . '" tabindex="-1" role="dialog" aria-labelledby="modalTitle_' . $invoice->id . '" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="modalTitle_' . $invoice->id . '">Complete Invoice Details</h5>
+                                        <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form action="' . route('complete.invoice') . '" method="POST" enctype="multipart/form-data">
+                                            ' . csrf_field() . '
+                                            <div class="row gx-3 mb-3">
+                                                <input type="hidden" name="invoice_no" value="' . $invoice->invoice_no . '">
+                                                <input type="hidden" name="invoice_id" value="' . $invoice->id . '" />
+                                                <div class="col-6 col-md-6">
+                                                    <label class="small mb-1" for="tds_' . $invoice->id . '">TDS</label>
+                                                    <input class="form-control" id="tds_' . $invoice->id . '" type="text" name="tds" value="" />
+                                                </div>
+                                                <div class="col-6 col-md-6">
+                                                    <label class="small mb-1" for="retention_' . $invoice->id . '">Retention</label>
+                                                    <input class="form-control" id="retention_' . $invoice->id . '" type="text" name="retention" value="" />
+                                                </div>
+                                                <div class="col-6 col-md-6">
+                                                    <label class="small mb-1" for="payment_receive_date_' . $invoice->id . '">Payment Receive Date</label>
+                                                    <input class="form-control" id="payment_receive_date_' . $invoice->id . '" type="date" name="payment_receive_date" value="" />
+                                                </div>
+                                                <div class="col-6 col-md-6">
+                                                    <label class="small mb-1" for="payment_' . $invoice->id . '">Payment</label>
+                                                    <input class="form-control" id="payment_' . $invoice->id . '" type="text" name="payment" value=""/>
+                                                </div>
+                                                <div class="col-6 col-md-6">
+                                                    <label class="small mb-1" for="penalty_' . $invoice->id . '">Penalty</label>
+                                                    <input class="form-control" id="penalty_' . $invoice->id . '" type="text" name="penalty" value=""/>
+                                                </div>
+                                            </div>
+                                            <button class="btn btn-primary" type="submit">Add Complete Invoice</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal fade" id="editInvoiceModal_' . $invoice->id . '" tabindex="-1" role="dialog" aria-labelledby="modalTitleEdit_' . $invoice->id . '" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="modalTitleEdit_' . $invoice->id . '">Generate Invoice Details</h5>
+                                        <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form action="' . route('invoice.update', $invoice->id) . '" method="POST">
+                                            ' . csrf_field() . '
+                                            ' . method_field('PUT') . '
+                                            <div class="row gx-3 mb-3">
+                                                <div class="col-6 col-md-6">
+                                                    <input type="hidden" name="company_id" value="' . $invoice->company_id . '">
+                                                    <label class="small mb-1" for="invoice_date_' . $invoice->id . '">Invoice Date <span class="text-danger">*</span></label>
+                                                    <input class="form-control" id="invoice_date_' . $invoice->id . '" type="date" name="invoice_date" value="' . $invoice->invoice_date . '" />
+                                                    <span id="error-invoice-date-message" class="error"></span>
+                                                </div>
+                                                <div class="col-6 col-md-6">
+                                                    <label class="small mb-1" for="invoice_no_' . $invoice->id . '">Invoice No <span class="text-danger">*</span></label>
+                                                    <input class="form-control" id="invoice_no_' . $invoice->id . '" type="text" name="invoice_no" value="' . $invoice->invoice_no . '"
+                                                        ' . (auth()->user()->role_id == 1 ? '' : 'readonly') . ' />
+                                                </div>
+                                            </div>
+                                            <button class="btn btn-primary" type="submit">Update Invoice</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                      ',
                 ];
             }
@@ -270,7 +272,9 @@ class InvoiceController extends Controller
                 "draw" => intval($request->input('draw')),
                 "recordsTotal" => intval($totalData),
                 "recordsFiltered" => intval($totalFiltered),
-                "data" => $data
+                "data" => $data,
+                "total_price_amount" => number_format($totalPriceAmount, 2),
+                "total_gst_amount" => number_format($totalGstAmount, 2)
             ];
 
             return response()->json($json_data);
@@ -681,7 +685,7 @@ class InvoiceController extends Controller
         $data = compact('invoice','products','i','sub_total','word','purchaseOrder');
 
         $pdf = PDF::loadView('admin.accountant.invoice.show',$data);
-        return $pdf->stream($invoice->invoice_no .'/00'. $invoice->id.'.pdf');
+        return $pdf->stream($invoice->invoice_no . '/' . substr($invoice->sum_no, -4) . '.pdf');
 
         return view('admin.accountant.invoice.show',$data);
     }
@@ -735,15 +739,15 @@ class InvoiceController extends Controller
     $digits_length = strlen($no);
     $i = 0;
     $str = [];
-    
+
     $words = [
-        0 => '', 1 => 'One', 2 => 'Two', 3 => 'Three', 4 => 'Four', 5 => 'Five', 6 => 'Six', 
+        0 => '', 1 => 'One', 2 => 'Two', 3 => 'Three', 4 => 'Four', 5 => 'Five', 6 => 'Six',
         7 => 'Seven', 8 => 'Eight', 9 => 'Nine', 10 => 'Ten', 11 => 'Eleven', 12 => 'Twelve',
-        13 => 'Thirteen', 14 => 'Fourteen', 15 => 'Fifteen', 16 => 'Sixteen', 17 => 'Seventeen', 
-        18 => 'Eighteen', 19 => 'Nineteen', 20 => 'Twenty', 30 => 'Thirty', 40 => 'Forty', 
+        13 => 'Thirteen', 14 => 'Fourteen', 15 => 'Fifteen', 16 => 'Sixteen', 17 => 'Seventeen',
+        18 => 'Eighteen', 19 => 'Nineteen', 20 => 'Twenty', 30 => 'Thirty', 40 => 'Forty',
         50 => 'Fifty', 60 => 'Sixty', 70 => 'Seventy', 80 => 'Eighty', 90 => 'Ninety'
     ];
-    
+
     $digits = ['', 'Hundred', 'Thousand', 'Lakh', 'Crore'];
 
     while ($i < $digits_length) {
@@ -768,7 +772,7 @@ class InvoiceController extends Controller
     }
 
     $Rupees = implode('', array_reverse($str));
-    
+
     // Handling decimals (Paise)
     $paise = '';
     if ($decimal > 0) {

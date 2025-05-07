@@ -323,9 +323,9 @@
                                                         <input type="hidden" name="company_id" value="{{$summaries->company_id}}">
                                                         <label class="small mb-1" for="inputFirstName">Performa Date <span class="text-danger">*</span></label>
                                                         @if ($summaries->performa_date)
-                                                            <input class="form-control error-performa-date-message" id="performa_date" type="text" name="performa_date" value="{{$summaries->performa_date}}" />
+                                                            <input class="form-control error-performa-date-message" id="performa_date" type="date" name="performa_date" value="{{$summaries->performa_date}}" />
                                                         @else
-                                                            <input class="form-control error-performa-date-message" id="performa_date" type="text" name="performa_date" value="" placeholder="DD-MM-YYYY"/>
+                                                            <input class="form-control error-performa-date-message" id="performa_date" type="date" name="performa_date" value="" placeholder="DD-MM-YYYY"/>
                                                         @endif
                                                         <span id="error-performa-date-message" class="error"></span>
                                                     </div>
@@ -465,14 +465,16 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
 
+    
+        
         $(document).ready(function() {
             $('.remove-input-field').click(function() {
-                var productId = $(this).data('id');
-                var row = $('#product-row-' + productId);
-
-                if (confirm('Are you sure you want to delete this product?')) {
+                var docId = $(this).data('id');
+                var row = $('#product-row-' + docId);
+    
+                if (confirm('Are you sure you want to delete this Product?')) {
                     $.ajax({
-                        url:  "{{ route('summary.product_destroy', ':id') }}".replace(':id', productId),
+                        url:  "{{ route('summary.product_destroy', ':id') }}".replace(':id', docId),
                         type: 'DELETE',
                         data: {
                             _token: '{{ csrf_token() }}',
@@ -492,31 +494,31 @@
             });
         });
 
-        $(document).ready(function() {
-            $('#dateInput').on('input', function() {
-                var dateInput = $(this).val();
-                var datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
+        // $(document).ready(function() {
+        //     $('#dateInput').on('input', function() {
+        //         var dateInput = $(this).val();
+        //         var datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
 
-                if (datePattern.test(dateInput)) {
-                    $('#error-message').text('');
-                } else {
-                    $('#error-message').text('Invalid date format. Please use DD-MM-YYYY.');
-                }
-            });
-        });
+        //         if (datePattern.test(dateInput)) {
+        //             $('#error-message').text('');
+        //         } else {
+        //             $('#error-message').text('Invalid date format. Please use DD-MM-YYYY.');
+        //         }
+        //     });
+        // });
 
-        $(document).ready(function() {
-            $('#performa_date').on('input', function() {
-                var dateInput = $(this).val();
-                var datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
+        // $(document).ready(function() {
+        //     $('#performa_date').on('input', function() {
+        //         var dateInput = $(this).val();
+        //         var datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
 
-                if (datePattern.test(dateInput)) {
-                    $('#error-performa-date-message').text('');
-                } else {
-                    $('#error-performa-date-message').text('Invalid date format. Please use DD-MM-YYYY.');
-                }
-            });
-        });
+        //         if (datePattern.test(dateInput)) {
+        //             $('#error-performa-date-message').text('');
+        //         } else {
+        //             $('#error-performa-date-message').text('Invalid date format. Please use DD-MM-YYYY.');
+        //         }
+        //     });
+        // });
 
         // $(document).ready(function() {
         //     $('#invoice_date').on('input', function() {

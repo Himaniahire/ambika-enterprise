@@ -33,9 +33,9 @@
                     <th style="font-size: 9px; text-align: center; font-family: serif; font-weight: 500; border: 2px solid #000; width: 120px;">DATE</th>
                     <th style="font-size: 9px; text-align: center; font-family: serif; font-weight: 500; border: 2px solid #000;">Page No</th>
                     <th style="font-size: 9px; text-align: center; font-family: serif; font-weight: 500; border: 2px solid #000;">Sr/No</th>
-                    @foreach ($descriptionArr as $description)
+                    @foreach ($descriptionArr as $index => $description)
                         <th colspan="4" style="font-size: 9px; text-align: center; font-family: serif; font-weight: 500; border: 2px solid #000;">{{ $description }}</th>
-                        <th style="font-size: 9px; text-align: center; font-family: serif; font-weight: 500; border: 2px solid #000;">TOTAL <br>{{ $summaries->companyServiceCode->uom }}</th>
+                        <th style="font-size: 9px; text-align: center; font-family: serif; font-weight: 500; border: 2px solid #000;">TOTAL <br>{{ $uomArr[$index] }}</th>
                     @endforeach
                     <th style="font-size: 9px; text-align: center; font-family: serif; font-weight: 500; border: 2px solid #000;">REMARKS</th>
                 </tr>

@@ -138,7 +138,7 @@
                     $totalFinalTotalAmount += $final_total_amount;
                     $totalNetTotalAmount += $net_total_amount;
 
-                    $status = $employee->status;  // 1 = Active, 0 = Inactive, 2 = Terminated, 3 = Resigned
+                    $status = $salary->getEmployee->status;  // 1 = Active, 0 = Inactive, 2 = Terminated, 3 = Resigned
                     $statusColor = '';
                     switch ($status) {
                         case 1:  // Active

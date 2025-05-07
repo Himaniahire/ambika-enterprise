@@ -102,7 +102,7 @@
                 </th>
                 <th class="bt" colspan="1" rowspan="2" style="text-align: center; border-right: 1px solid #000; border-bottom: 1px solid #000">
                     <div class="text-center">
-                        <p class="p-tag"><b>INVOICE DATE: </b><br>{{ $performas->performa_date }}</p>
+                        <p class="p-tag"><b>INVOICE DATE: </b><br>{{ \Carbon\Carbon::parse($performas->performa_date)->format('d-m-Y') }}</p>
                     </div>
                 </th>
             </tr>
@@ -131,7 +131,8 @@
                 <th class="bt" colspan="1" rowspan="2" style="text-align: center; border-right: 1px solid #000; border-bottom: 1px solid #000">
                     <div class="text-center">
                         @if ($purchaseOrder)
-                            <p class="p-tag"><b>PO DATE: </b><br>{{ $purchaseOrder->purchaseOrder ? $purchaseOrder->purchaseOrder->po_date : '-' }}</p>
+                            <p class="p-tag"><b>PO DATE: </b><br>{{ $purchaseOrder->purchaseOrder && $purchaseOrder->purchaseOrder->po_date ? \Carbon\Carbon::parse($purchaseOrder->purchaseOrder->po_date)->format('d-m-Y') : '-' }}
+                            </p>
                         @endif
                     </div>
                 </th>
@@ -195,7 +196,7 @@
             @foreach ($products as $product)
                 <tr>
                     <td class="padding" style="text-align: left; vertical-align: middle; border: 1px solid #000; text-align: center;">{{ $i++ }}</td>
-                    <td class="padding" style=" text-align: center;  border: 1px solid #000;  display: -webkit-box;  -webkit-line-clamp: 3;  -webkit-box-orient: vertical; 
+                    <td class="padding" style=" text-align: center;  border: 1px solid #000;  display: -webkit-box;  -webkit-line-clamp: 3;  -webkit-box-orient: vertical;
                         overflow: hidden; text-overflow: ellipsis;  word-wrap: break-word;"> {{ $product->job_description }}</td>
                     <td class="padding" style="text-align: left; vertical-align: middle; border: 1px solid #000; text-align: center;">{{ $product->companyServiceCode->service_code ?? "N/A"}}</td>
                     <td class="padding" style="text-align: left; vertical-align: middle; border: 1px solid #000; text-align: center;">{{ $product->companyServiceCode->uom }}</td>

@@ -184,193 +184,6 @@ class RegisterCompanyController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    // public function update(Request $request, $id)
-    // {
-    //     $request->validate([
-    //         'companyname' => 'required|string|max:255',
-    //         'state' => 'required|string|max:255',
-    //         'email' => 'nullable|email|unique:register_companies,email,' . $id,
-    //         'phone' => 'nullable|numeric|digits:10',
-    //         'inv_no_name' => 'required|string|max:255',
-    //         'address_1' => 'required|string|max:255',
-    //         'address_2' => 'required|string|max:255',
-    //         'gstnumber' => 'required|array|min:1',
-    //         'gstnumber.*' => 'required|string|max:255',
-    //         'pannumber' => 'required',
-    //         'order_no.*' => 'required|string|max:255',
-    //         'service_code.*' => 'required|string',
-    //         'job_description.*' => 'required|string',
-    //         'uom.*' => 'required|string',
-    //         'price.*' => 'required|numeric',
-    //     ]);
-
-    //     $companies = RegisterCompany::find($id);
-    //     $companies->companyname = $request->companyname;
-    //     $companies->state = $request->state;
-    //     $companies->inv_no_name = $request->inv_no_name;
-    //     $companies->vendor_code = $request->vendor_code;
-    //     $companies->email = $request->email;
-    //     $companies->address_1 = $request->address_1;
-    //     $companies->address_2 = $request->address_2;
-    //     $companies->address_3 = $request->address_3;
-    //     $companies->is_lut = $request->is_lut;
-    //     $companies->lut_no = $request->lut_no;
-    //     $companies->doa = $request->doa;
-    //     $companies->update();
-
-    //     foreach ($request->gstnumber as $gstnumber) {
-    //         GstNumber::updateOrCreate(
-    //             ['company_id' => $companies->id, 'gstnumber' => $gstnumber],
-    //             ['gstnumber' => $gstnumber]
-    //         );
-    //     }
-
-    //     if ($companies) {
-    //         $companies_id = $companies->id;
-
-    //         foreach ($request->job_description as $key => $description) {
-    //             $CompanyServiceCode = [
-    //                 'company_id'      => $companies_id,
-    //                 'order_no'        => $request->order_no[$key],
-    //                 'job_description' => $description,
-    //                 'service_code'    => $request->service_code[$key],
-    //                 'uom'             => $request->uom[$key],
-    //                 'price'           => $request->price[$key],
-    //             ];
-
-    //             $sr_no = $request->sr_no[$key] ?? null;
-
-    //             $existingRecord = CompanyServiceCode::where([
-    //                 'company_id'    => $companies_id,
-    //                 'order_no'      => $request->order_no[$key],
-    //                 'job_description' => $description,
-    //                 'service_code'  => $request->service_code[$key],
-    //             ])->first();
-
-    //             if (!$existingRecord) {
-    //                 if ($sr_no) {
-    //                     $existingRecord = CompanyServiceCode::find($sr_no);
-
-    //                     if ($existingRecord) {
-    //                         $existingRecord->update($CompanyServiceCode);
-    //                     } else {
-    //                         CompanyServiceCode::create($CompanyServiceCode);
-    //                     }
-    //                 } else {
-    //                     CompanyServiceCode::create($CompanyServiceCode);
-    //                 }
-    //             }
-    //             if (!$existingRecord) {
-    //                 if ($sr_no) {
-    //                     $existingRecord = CompanyServiceCode::find($sr_no);
-    //                     if ($existingRecord) {
-    //                         $oldData = $existingRecord->toArray();
-    //                         $existingRecord->update($CompanyServiceCode);
-
-    //                         ActivityLog::create([
-    //                             'user_id' => Auth::id(),
-    //                             'action' => 'Updated Service Code',
-    //                             'entity_type' => 'CompanyServiceCode',
-    //                             'entity_id' => $existingRecord->id,
-    //                             'old_data' => json_encode($oldData),
-    //                             'new_data' => json_encode($CompanyServiceCode),
-    //                             'details' => "Service Code '{$oldData['service_code']}' updated to '{$CompanyServiceCode['service_code']}' for Company $companies->companyname"
-    //                         ]);
-    //                     } else {
-    //                         $newService = CompanyServiceCode::create($CompanyServiceCode);
-
-    //                         ActivityLog::create([
-    //                             'user_id' => Auth::id(),
-    //                             'action' => 'Created Service Code',
-    //                             'entity_type' => 'CompanyServiceCode',
-    //                             'entity_id' => $newService->id,
-    //                             'new_data' => json_encode($CompanyServiceCode),
-    //                             'details' => "New Service Code '{$newService->service_code}' created for Company $companies->companyname"
-    //                         ]);
-    //                     }
-    //                 } else {
-    //                     $newService = CompanyServiceCode::create($CompanyServiceCode);
-
-    //                     ActivityLog::create([
-    //                         'user_id' => Auth::id(),
-    //                         'action' => 'Created Service Code',
-    //                         'entity_type' => 'CompanyServiceCode',
-    //                         'entity_id' => $newService->id,
-    //                         'new_data' => json_encode($CompanyServiceCode),
-    //                         'details' => "New Service Code '{$newService->service_code}' created for Company $companies->companyname"
-    //                     ]);
-    //                 }
-    //             }
-
-    //             // foreach ($request->job_description as $key => $description) {
-    //             //     $CompanyServiceCode = [
-    //             //         'company_id'      => $companies_id,
-    //             //         'order_no'        => $request->order_no[$key] ?? null,
-    //             //         'job_description' => $description,
-    //             //         'service_code'    => $request->service_code[$key] ?? null,
-    //             //         'uom'             => $request->uom[$key] ?? null,
-    //             //         'price'           => $request->price[$key] ?? null,
-    //             //     ];
-
-    //             //     $sr_no = $request->sr_no[$key] ?? null;
-
-    //             //     // Log request details for debugging
-    //             //     Log::info('Processing Job Description', [
-    //             //         'key' => $key,
-    //             //         'description' => $description,
-    //             //         'sr_no' => $sr_no,
-    //             //         'company_id' => $companies_id,
-    //             //         'order_no' => $CompanyServiceCode['order_no'],
-    //             //         'service_code' => $CompanyServiceCode['service_code']
-    //             //     ]);
-
-    //             //     // Check for existing record
-    //             //     $existingRecord = CompanyServiceCode::where([
-    //             //         'company_id'    => $companies_id,
-    //             //         'order_no'      => $CompanyServiceCode['order_no'],
-    //             //         'job_description' => $description,
-    //             //         'service_code'  => $CompanyServiceCode['service_code'],
-    //             //     ])->first();
-
-    //             //     if ($sr_no) {
-    //             //         $existingRecord = CompanyServiceCode::find($sr_no);
-    //             //     }
-
-    //             //     if ($existingRecord) {
-    //             //         $oldData = $existingRecord->toArray();
-    //             //         $existingRecord->update($CompanyServiceCode);
-    //             //         $logAction = 'Updated Service Code';
-    //             //     } else {
-    //             //         $existingRecord = CompanyServiceCode::create($CompanyServiceCode);
-    //             //         $logAction = 'Created Service Code';
-    //             //     }
-
-    //             //     // Log database action
-    //             //     Log::info($logAction, [
-    //             //         'entity_id' => $existingRecord->id,
-    //             //         'old_data' => isset($oldData) ? $oldData : null,
-    //             //         'new_data' => $CompanyServiceCode
-    //             //     ]);
-
-    //             //     ActivityLog::create([
-    //             //         'user_id' => Auth::id(),
-    //             //         'action' => $logAction,
-    //             //         'entity_type' => 'CompanyServiceCode',
-    //             //         'entity_id' => $existingRecord->id,
-    //             //         'old_data' => isset($oldData) ? json_encode($oldData) : null,
-    //             //         'new_data' => json_encode($CompanyServiceCode),
-    //             //         'details' => ($logAction === 'Updated Service Code')
-    //             //             ? "Service Code '{$oldData['service_code']}' updated to '{$CompanyServiceCode['service_code']}' for Company {$companies->companyname}"
-    //             //             : "New Service Code '{$existingRecord->service_code}' created for Company {$companies->companyname}"
-    //             //     ]);
-    //             // }
-    //         }
-    //     }
-
-
-
-    //     return redirect('admin/accountant/register_company')->with('success','Company Registered Detail Update Successfully.');
-    // }
 
     public function update(Request $request, $id)
     {
@@ -405,12 +218,28 @@ class RegisterCompanyController extends Controller
         $companies->doa = $request->doa;
         $companies->update();
 
-        foreach ($request->gstnumber as $gstnumber) {
-            GstNumber::updateOrCreate(
-                ['company_id' => $companies->id, 'gstnumber' => $gstnumber],
-                ['gstnumber' => $gstnumber]
-            );
+        $gids = $request->input('gid');
+        $gstnumbers = $request->input('gstnumber');
+        // dd($gids, $gstnumbers);
+
+        foreach ($gstnumbers as $index => $gstnumber) {
+            $gid = $gids[$index] ?? null;
+
+            if ($gid) {
+                // Update existing
+                GstNumber::updateOrCreate(
+                    ['id' => $gid],
+                    ['gstnumber' => $gstnumber]
+                );
+            } else {
+                // Create new
+                GstNumber::create([
+                    'company_id' => $companies->id,
+                    'gstnumber' => $gstnumber
+                ]);
+            }
         }
+
 
 
         if ($companies) {

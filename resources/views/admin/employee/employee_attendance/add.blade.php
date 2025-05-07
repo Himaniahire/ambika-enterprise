@@ -78,13 +78,14 @@
                                 @enderror
                             </div>
 
-                            <table id="attendanceTable" class="mt-5">
+                            <table id="attendanceTable" class="mt-5 table ">
                                 <thead>
                                     <tr>
                                         <th>Sr. No.</th>
                                         <th>Employee Name</th>
                                         <th>Employee Code</th>
                                         <th>Action</th>
+                                        <th>Over Time (OT)</th>
                                     </tr>
                                 </thead>
                                 <tfoot>
@@ -93,6 +94,7 @@
                                         <th>Employee Name</th>
                                         <th>Employee Code</th>
                                         <th>Action</th>
+                                        <th>Over Time (OT)</th>
                                     </tr>
                                 </tfoot>
                                 <tbody id="tableBody">
@@ -122,76 +124,15 @@
                                                     </li>
                                                 </ul>
                                             </td>
+                                            <td>
+                                                <input class="form-control over-time-input" type="number" name="present_over_time[{{ $employee->id }}]" value="0" data-employee-id="{{ $employee->id }}">
+                                                <input class="form-control over-time-input d-none" type="number" name="half_day_over_time[{{ $employee->id }}]" value="0" data-employee-id="{{ $employee->id }}">
+                                                <input class="form-control over-time-input d-none" type="number" name="holiday_over_time[{{ $employee->id }}]" value="0" data-employee-id="{{ $employee->id }}">
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                             </table>
-
-                            <!-- Present Overtime Modal -->
-                            <div class="modal fade" id="overtimeModal" tabindex="-1" aria-labelledby="overtimeModalLabel" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="overtimeModalLabel">Present Over Time (OT)</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <div class="col-6 col-md-12">
-                                                <label for="half_day_over_time">Over Time (OT)</label>
-                                                <input type="number" class="form-control" id="present_over_time" name="present_over_time" placeholder="Over Time (OT)">
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                            <button type="button" class="btn btn-primary" id="saveOvertime">Save changes</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Holiday Overtime Modal -->
-                            <div class="modal fade" id="halfDayOverTimeModal" tabindex="-1" aria-labelledby="halfDayOverTimeModalLabel" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="halfDayOverTimeModalLabel">Half Day Over Time (OT)</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <div class="col-6 col-md-12">
-                                                <label for="half_day_over_time">Over Time (OT)</label>
-                                                <input type="number" class="form-control" id="half_day_over_time" name="half_day_over_time" placeholder="Over Time (OT)">
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                            <button type="button" class="btn btn-primary" id="savehalfDayOvertime">Save changes</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Holiday Overtime Modal -->
-                            <div class="modal fade" id="holidayOverTimeModal" tabindex="-1" aria-labelledby="holidayOverTimeModalLabel" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="holidayOverTimeModalLabel">Holiday Over Time (OT)</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <div class="col-6 col-md-12">
-                                                <label for="holiday_over_time">Over Time (OT)</label>
-                                                <input type="number" class="form-control" id="holiday_over_time" name="holiday_over_time" placeholder="Over Time (OT)">
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                            <button type="button" class="btn btn-primary" id="saveHolidayOvertime">Save changes</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
 
                             <button type="submit" class="btn btn-primary mt-3">Submit Attendance</button>
                         </form>
@@ -207,6 +148,24 @@
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
 <script>
+
+$(document).on('change', 'input[type=radio][name^="status"]', function () {
+    var employeeId = $(this).data('employee-id');
+    var status = $(this).val();
+
+    // Hide all OT inputs first
+    $('input[name^="present_over_time[' + employeeId + ']"]').addClass('d-none');
+    $('input[name^="half_day_over_time[' + employeeId + ']"]').addClass('d-none');
+    $('input[name^="holiday_over_time[' + employeeId + ']"]').addClass('d-none');
+
+    if (status == 1) {
+        $('input[name^="present_over_time[' + employeeId + ']"]').removeClass('d-none');
+    } else if (status == 2) {
+        $('input[name^="half_day_over_time[' + employeeId + ']"]').removeClass('d-none');
+    } else if (status == 3) {
+        $('input[name^="holiday_over_time[' + employeeId + ']"]').removeClass('d-none');
+    }
+});
 
 $(document).ready(function() {
     let currentEmployeeId;
@@ -268,136 +227,52 @@ $(document).ready(function() {
         });  // Debug log
         $('#holidayOverTimeModal').modal('hide');
     });
-
-    // Handle form submission
-    // $('#attendanceForm').on('submit', function(e) {
-    //     e.preventDefault();
-
-    //     const formData = $(this).serialize();
-    //     console.log('Form Data:', formData);  // Debug log
-
-    //     $.ajax({
-    //         url: $(this).attr('action'),
-    //         method: 'POST',
-    //         data: formData,
-    //         success: function(response) {
-    //             toastr.success('Attendance saved successfully!');
-    //         }
-    //     });
-    // });
 });
 
-$(document).ready(function() {
-    var table = $('#attendanceTable').DataTable();
+// $(document).ready(function() {
+//     var table = $('#attendanceTable').DataTable();
 
-    // Check if DataTable is already initialized
-    if ( ! $.fn.DataTable.isDataTable('#attendanceTable') ) {
-        table = $('#attendanceTable').DataTable({
-            // DataTable options here
-            "paging": true,
-            "autoWidth": false,
-            // Other options as needed
-        });
-    }
+//     if ( ! $.fn.DataTable.isDataTable('#attendanceTable') ) {
+//         table = $('#attendanceTable').DataTable({
+//             // DataTable options here
+//             "paging": false,
+//             "autoWidth": false,
+//         });
+//     }
 
-    // Custom search filter for company_id
-    $.fn.dataTable.ext.search.push(
-        function(settings, data, dataIndex) {
-            var companyId = $('#company_id').val().trim();
-            var rowCompanyId = table.row(dataIndex).node().getAttribute('data-company-id');
+//     $.fn.dataTable.ext.search.push(
+//         function(settings, data, dataIndex) {
+//             var companyId = $('#company_id').val().trim();
+//             var rowCompanyId = table.row(dataIndex).node().getAttribute('data-company-id');
 
-            if (companyId === '' || rowCompanyId === companyId) {
-                return true;
+//             if (companyId === '' || rowCompanyId === companyId) {
+//                 return true;
+//             }
+//             return false;
+//         }
+//     );
+
+//     $('#company_id').on('change', function() {
+//         table.draw();
+//     });
+// });
+
+$(document).ready(function () {
+    $('#company_id').on('change', function () {
+        var selectedCompanyId = $(this).val().trim();
+
+        $('#attendanceTable tbody tr').each(function () {
+            var rowCompanyId = $(this).data('company-id');
+
+            if (selectedCompanyId === '' || rowCompanyId == selectedCompanyId) {
+                $(this).show();
+            } else {
+                $(this).hide();
             }
-            return false;
-        }
-    );
-
-    // Filter based on company_id
-    $('#company_id').on('change', function() {
-        table.draw();
+        });
     });
 });
 
-
-// $(document).ready(function () {
-//     $('#attendanceForm').on('submit', function (e) {
-//         let isValid = true;
-
-//         // Clear previous error messages
-//         $('.invalid-feedback').remove();
-
-//         if ($('.company_id').val() === '') {
-//             isValid = false;
-//             $('.company_id').addClass('is-invalid').after('<div class="invalid-feedback">Please select a Company Name.</div>');
-//         } else {
-//             $('.company_id').removeClass('is-invalid');
-//         }
-
-//         if ($('.attendance_date').val() === '') {
-//             isValid = false;
-//             $('.attendance_date').addClass('is-invalid').after('<div class="invalid-feedback">Please select a Attendance Date.</div>');
-//         } else {
-//             $('.attendance_date').removeClass('is-invalid');
-//         }
-
-//         if (!$('input[name="status"]:checked').val()) {
-//             isValid = false;
-//             $('.status').addClass('is-invalid').after('<div class="invalid-feedback">Please select an Attendance Status.</div>');
-//         } else {
-//             $('.status').removeClass('is-invalid');
-//         }
-
-//         // Prevent form submission if not valid
-//         if (!isValid) {
-//             e.preventDefault();
-//         }
-//     });
-// });
-
-// $(function() {
-//     let highlightedDates = [];
-
-// $("#attendance_date").datepicker({
-//     dateFormat: 'dd-mm-yy', // Display date in dd-mm-yyyy format
-//     beforeShowDay: function(date) {
-//         let storeDateFormat = $.datepicker.formatDate('yy-mm-dd', date); // Store in yyyy-mm-dd format
-
-//         // Logic to check and highlight dates
-//         if (highlightedDates.includes(storeDateFormat)) {
-//             return [true, 'highlighted-date']; // Add highlighted class if the date is in the array
-//         } else {
-//             return [true, 'missing-date']; // Add missing-date class for dates not in the array
-//         }
-//     },
-//     onSelect: function(dateText, inst) {
-//         // Get the selected date as a JavaScript Date object
-//         let selectedDate = $(this).datepicker('getDate');
-        
-//         // Convert the selected date to yyyy-mm-dd format for storing
-//         let storeDate = $.datepicker.formatDate('yy-mm-dd', selectedDate);
-
-//         // Set the hidden input field or any other storage mechanism with the stored date
-//         $("#stored_date").val(storeDate); // Assuming you have a hidden input to store the date
-
-//         console.log("Date to store: " + storeDate); // For debugging purposes, you can store this date
-//     }
-// });
-
-
-//     $('#company_id').on('change', function() {
-//         let companyId = $(this).val();
-//         $.ajax({
-//             url: '{{ route('attendance.check') }}', // Update with your route
-//             method: 'GET',
-//             data: { company_id: companyId },
-//             success: function(response) {
-//                 highlightedDates = response.dates;
-//                 $("#datepicker").datepicker('refresh');
-//             }
-//         });
-//     });
-// });
 
 $(function() {
     let highlightedDates = [];
@@ -425,8 +300,8 @@ $(function() {
             let storeDate = $.datepicker.formatDate('yy-mm-dd', selectedDate);
 
             $("#stored_date").val(storeDate); // Store the selected date
+            $("#attendance_date").val(storeDate).trigger('change');
 
-            console.log("Date to store: " + storeDate);
         }
     });
 
@@ -443,7 +318,6 @@ $(function() {
         });
     });
 });
-
 
 $(document).ready(function () {
     $('#attendanceForm').on('submit', function (e) {
@@ -467,18 +341,6 @@ $(document).ready(function () {
             $('.attendance_date').addClass('is-invalid').after('<div class="invalid-feedback">Please select an Attendance Date.</div>');
         }
 
-        // Validate each employee's status selection
-        $('tr[data-company-id]').each(function () {
-            let $row = $(this);
-            let radioGroup = $row.find('input[type="radio"][name^="status["]');
-
-            if (radioGroup.length > 0 && radioGroup.filter(':checked').length === 0) {
-                isValid = false;
-                radioGroup.addClass('is-invalid'); // Highlight radio buttons
-                $row.find('td:last').append('<div class="invalid-feedback text-danger">Please select an Attendance Status.</div>');
-            }
-        });
-
         // Stop the form submission if validation fails
         if (!isValid) {
             return;
@@ -500,9 +362,52 @@ $(document).ready(function () {
     });
 });
 
+$('#company_id, #attendance_date').on('change', function () {
+    const companyId = $('#company_id').val();
+    const attendanceDate = $('#attendance_date').val();
 
+    console.log('Company ID:', companyId);
+    console.log('Attendance Date:', attendanceDate);
 
+    if (companyId && attendanceDate) {stored_date
+        $.ajax({
+            url: '{{ route("employee_attendance.fetch") }}',
+            method: 'GET',
+            data: {
+                company_id: companyId,
+                attendance_date: attendanceDate
+            },
+            success: function(response) {
+                updateAttendanceTable(response.attendance);
+            }
+        });
+    }
+});
 
+function updateAttendanceTable(data) {
+    // Reset all rows
+    $('input[type=radio]').prop('checked', false);
+    $('.over-time-input').val(0).addClass('d-none');
+
+    $.each(data, function(index, item) {
+        // Select the correct radio button
+        $('input[name="status[' + item.emp_id + ']"][value="' + item.status + '"]').prop('checked', true);
+
+        // Hide all overtime inputs for this employee
+        $('input[name^="present_over_time[' + item.emp_id + ']"]').addClass('d-none');
+        $('input[name^="half_day_over_time[' + item.emp_id + ']"]').addClass('d-none');
+        $('input[name^="holiday_over_time[' + item.emp_id + ']"]').addClass('d-none');
+
+        // Show and set value for relevant overtime input
+        if (item.status == 1) {
+            $('input[name="present_over_time[' + item.emp_id + ']"]').removeClass('d-none').val(item.over_time);
+        } else if (item.status == 2) {
+            $('input[name="half_day_over_time[' + item.emp_id + ']"]').removeClass('d-none').val(item.over_time);
+        } else if (item.status == 3) {
+            $('input[name="holiday_over_time[' + item.emp_id + ']"]').removeClass('d-none').val(item.over_time);
+        }
+    });
+}
 
 </script>
 

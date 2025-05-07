@@ -262,10 +262,10 @@
             <tr class="bt" >
                 @if ($invoice->tax == NULL)
                     <th class="padding" colspan="3" style="border-right: none">
-                        <p>LUT NO:- {{'AD2404240149753' ?? $invoice->getCompany->lut_no}} </p>
+                        <p>LUT NO:- {{ $invoice->getCompany->lut_no }} </p>
                     </th>
                     <th class="padding" colspan="4">
-                        <p>DOA:- {{'08/04/2024 '?? $invoice->getCompany->doa}}</p>
+                        <p>DOA:- {{ \Carbon\Carbon::parse( $invoice->getCompany->doa)->format('d-m-Y') }}</p>
                     </th>
                 @endif
             <tr class="bt">

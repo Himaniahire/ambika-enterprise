@@ -254,6 +254,39 @@ class SummaryController extends Controller
             $filePath = $request->document->move(public_path('summary_pdf'), $fileName);
         }
 
+        $currentMonth = date('n');
+        $currentYear = date('y');
+
+        if ($currentMonth < 4) {
+            $startYear = $currentYear - 1;
+            $endYear = $currentYear;
+        } else {
+            $startYear = $currentYear;
+            $endYear = $currentYear + 1;
+        }
+
+        // Format year as "25-26"
+        $yearRange = sprintf('%02d-%02d', $startYear, $endYear);
+
+        // Fetch last record of current financial year
+        $lastSummary = Summary::where('sum_no', 'like', "$yearRange/SUM/%")
+        ->orderByRaw('RIGHT(sum_no, 5) DESC')
+        ->first();
+
+        if ($lastSummary) {
+            $lastNumber = (int) substr($lastSummary->sum_no, strrpos($lastSummary->sum_no, '/') + 1);
+            $nextNumber = $lastNumber + 1;
+        } else {
+            $nextNumber = 1;
+        }
+
+        // Format as 5-digit number with leading zeroes
+        $nextNumberFormatted = str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+
+        // Final sum_no: "25-26/SUM/00001"
+        $sum_no = "$yearRange/SUM/$nextNumberFormatted";
+// dd($sum_no);
+
         $summaries = new Summary([
             "company_id" => $request->company_name,
             "gst_id" => $request->gst_id,
@@ -263,7 +296,7 @@ class SummaryController extends Controller
             "work_contract_order_no" => $request->work_contract_order_no,
             "category_of_service_id" => $request->category_of_service,
             "work_period" => $request->work_period,
-            "sum_no" => $request->sum_no,
+            "sum_no" => $sum_no,
             "summ_date" => $request->summary_duration,
             "com_unit" => $request->com_unit,
             "department" => $request->department,
@@ -275,25 +308,6 @@ class SummaryController extends Controller
         $summaries->save();
         $summary_id = DB::table('summaries')->orderBy('id','DESC')->select('id')->first();
         $summary_id = $summary_id->id;
-        // foreach($request->job_description as $key => $descriptions)
-        // {
-        //     $summaryProduct['job_description']  = $descriptions;
-        //     $summaryProduct['summary_id']       = $summary_id;
-        //     $summaryProduct['po_id']            = $request->po_no_id;
-        //     $summaryProduct['service_code_id']  = $request->service_code[$key];
-        //     $summaryProduct['sum_date']         = $request->sum_date[$key];
-        //     $summaryProduct['pg_no']            = $request->pg_no[$key];
-        //     $summaryProduct['length']           = $request->length[$key];
-        //     $summaryProduct['width']            = $request->width[$key];
-        //     $summaryProduct['height']           = $request->height[$key];
-        //     $summaryProduct['nos']              = $request->nos[$key];
-        //     $summaryProduct['total_qty']        = $request->length[$key] * $request->width[$key] * $request->height[$key] * $request->nos[$key];
-        //     SummaryProduct::create($summaryProduct);
-
-        //     $total_amount =  $request->length[$key] * $request->width[$key] * $request->height[$key] * $request->nos[$key];
-        //     $summaries->total += number_format(round($total_amount, 2), 2, '.', '');
-        //     $summaries->update();
-        // }
 
         foreach($request->job_description as $key => $descriptions)
         {
@@ -367,31 +381,29 @@ class SummaryController extends Controller
         $summaries = Summary::with('summaryProducts')->find($id);
 
         $descData = SummaryProduct::join('company_service_codes', 'summary_products.service_code_id', '=', 'company_service_codes.id')
-                ->whereIn('company_service_codes.order_no', $orders)
-                ->where('summary_products.summary_id', $id)
-                ->select('summary_products.job_description', 'company_service_codes.order_no')
-                ->distinct()
-                ->orderBy('company_service_codes.order_no', 'asc')
-                ->get()
-                ->toArray();
+            ->whereIn('company_service_codes.order_no', $orders)
+            ->where('summary_products.summary_id', $id)
+            ->select('summary_products.job_description', 'company_service_codes.order_no', 'company_service_codes.uom')  // Add 'uom' field here
+            ->distinct()
+            ->orderBy('company_service_codes.order_no', 'asc')
+            ->get()
+            ->toArray();
 
         $i = 1;
         $descriptionArr = [];
-        // Count the distinct job descriptions
+        $uomArr = [];
         $colspan = count($descData);
-        // dd($colspan);
 
-        // Calculate the total colspan
         $totalColspan = $colspan + $colspan + 4 * $colspan + 3;
-        // dd($totalColspan);
 
         foreach ($descData as $descDataKey => $descDataVal) {
             $descriptionArr[] = $descDataVal['job_description'];
+            $uomArr[] = $descDataVal['uom'];
         }
 
-        $data = compact('summaries', 'i', 'descriptionArr','totalColspan');
+        $data = compact('summaries', 'i', 'descriptionArr','totalColspan', 'uomArr');
 
-        $filename = $summaries->sum_no . '_00' . $summaries->id . '.xlsx';
+        $filename = $summaries->sum_no . '.xlsx';
         $filename = str_replace(['/', '\\'], '_', $filename); // Replace '/' and '\' with '_'
 
         return Excel::download(new SummariesExport($data), $filename);

@@ -50,22 +50,19 @@
                                         </select>
                                     </div>
                                     <div class="col-6 col-md-3">
-                                        <label class="small  mb-1" for="inputFirstName">Invoice Status</label>
-                                        <select class="form-control" id="invoice_status" name="invoice_status">
-                                            <option value="">Select Status</option>
-                                            <option value="Pending">Pending</option>
-                                            <option value="Complete">Complete</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-6 col-md-3">
                                         <label class="small mb-1" for="inputFirstName">Start Date</label>
                                         <input class="form-control" id="start_date" type="date" name="start_date"
-                                            value="" required/>
+                                            value="" />
                                     </div>
                                     <div class="col-6 col-md-3" id="inputContainer">
                                         <label class="small mb-1" for="inputFirstName">End Date</label>
                                         <input class="form-control" type="date" name="end_date" id="end_date"
-                                            value="" required/>
+                                            value="" />
+                                    </div>
+                                     <div class="col-6 col-md-3" id="inputContainer">
+                                        <label class="small mb-1" for="inputFirstName">month</label>
+                                        <input class="form-control" type="month" name="month" id="month"
+                                            value="" />
                                     </div>
                                 </div>
                                 <button class="btn btn-primary" type="submit">Search</button>

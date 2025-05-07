@@ -39,7 +39,7 @@
     fetch("/api/chart-data")
     .then(response => response.json())
     .then(data => {
-        const ctx = document.getElementById("myBarChart").getContext("2d");
+        const ctx = document.getElementById("myBarChart");
 
         const maxYValue = data.maxGstAmount * 1.2; // Increase by 20% for better visibility
 

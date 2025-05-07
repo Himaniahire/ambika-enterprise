@@ -103,21 +103,11 @@
                         </thead>
                         <tfoot>
                             <tr>
-                                <th>Sr. No.</th>
-                                <th>Company Name</th>
-                                <th>Invoice Date</th>
-                                <th>Invoice No</th>
-                                <th>Summary No</th>
-                                <th>Performa No</th>
-                                <th>PO No</th>
-                                <th>Total QTY</th>
-                                <th>Total Rs.</th>
-                                <th>Payment Status</th>
-                                <th></th>
-                                <th>Action</th>
+                                <th colspan="7" style="text-align:right">Total GST:</th>
+                                <th id="totalPriceAmount"></th>
+                                <th id="totalGstAmount"></th>
                             </tr>
                         </tfoot>
-
                     </table>
                 </div>
             </div>
@@ -127,7 +117,7 @@
 
 
 @section('footer-script')
-    <script>
+    {{-- <script>
         $(document).ready(function() {
             function setDateRangePicker() {
                 var start
@@ -170,8 +160,8 @@
                 ajax: {
                     url: "{{ route('invoice.index') }}",
                     data: function(d) {
-                        // d.invoice_status = $('#statusFilter').val();
-                        // d.per_inv_filter = $('#perInvNo').val();
+                        d.invoice_status = $('#statusFilter').val();
+                        d.per_inv_filter = $('#perInvNo').val();
                         // d.start_date = start.format('YYYY-MM-DD');
                         // d.end_date = end.format('YYYY-MM-DD');
                     }
@@ -248,7 +238,10 @@
                     [1, 'asc']
                 ],
             });
-
+            $('#invTable').on('xhr.dt', function (e, settings, json, xhr) {
+                $('#totalPriceAmount').html(json.total_price_amount);
+                $('#totalGstAmount').html(json.total_gst_amount);
+            });
             // Refresh DataTable when filters change
             $('#statusFilter, #perInvNo').change(function() {
                 table.ajax.reload(null, false);
@@ -262,7 +255,114 @@
                 table.ajax.reload(null, false);
             });
         });
+    </script> --}}
+
+    <script>
+        $(document).ready(function() {
+            let table;
+
+            function setDateRangePicker() {
+                $('#reportrange span').html('MM/DD/YYYY - MM/DD/YYYY');
+
+                $('#reportrange').daterangepicker({
+                    autoUpdateInput: false,
+                    alwaysShowCalendars: true,
+                    opens: 'center',
+                    autoApply: true,
+                    ranges: {
+                        'Today': [moment(), moment()],
+                        'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                        'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                        'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                        'This Month': [moment().startOf('month'), moment().endOf('month')],
+                        'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                    }
+                }, function(start, end) {
+                    if (moment.isMoment(start) && moment.isMoment(end)) {
+                        $('#reportrange span').html(
+                            start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY')
+                        );
+                        window.dateRange = { start, end };
+                        table.ajax.reload(null, false);
+                    }
+                });
+
+                // Initial empty state
+                window.dateRange = { start: null, end: null };
+
+                // On cancel (if user clears the picker)
+                $('#reportrange').on('cancel.daterangepicker', function(ev, picker) {
+                    $(this).find('span').html('MM/DD/YYYY - MM/DD/YYYY');
+                    window.dateRange = { start: null, end: null };
+                    table.ajax.reload(null, false);
+                });
+            }
+
+            // Call the date picker setup
+            setDateRangePicker();
+
+            // Initialize DataTable
+            table = $('#invTable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: "{{ route('invoice.index') }}",
+                    data: function(d) {
+                        d.invoice_status = $('#statusFilter').val();
+                        d.per_inv_filter = $('#perInvNo').val();
+
+                        if (window.dateRange.start && window.dateRange.end) {
+                            d.start_date = window.dateRange.start.format('YYYY-MM-DD');
+                            d.end_date = window.dateRange.end.format('YYYY-MM-DD');
+                        }
+                    }
+                },
+                columns: [
+                    { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                    { data: 'company_name', name: 'getCompany.companyname', orderable: false },
+                    { data: 'invoice_date', name: 'invoice_date', defaultContent: 'N/A', orderable: false },
+                    { data: 'invoice_no', name: 'invoice_no', defaultContent: 'N/A', orderable: false },
+                    { data: 'sum_no', name: 'sum_no', orderable: false },
+                    { data: 'performa_no', name: 'performa_no', orderable: false },
+                    { data: 'po_no', name: 'po_no', orderable: false },
+                    { data: 'total', name: 'total', orderable: false },
+                    { data: 'gst_amount', name: 'gst_amount', orderable: false },
+                    { data: 'status', name: 'status', orderable: false },
+                    { data: 'invoice_status', name: 'invoice_status', orderable: false },
+                    { data: 'action', name: 'action', orderable: false, searchable: false },
+                ],
+                drawCallback: function(settings) {
+                    feather.replace(); // If you're using Feather icons
+                },
+                order: [[1, 'asc']]
+            });
+
+            // When filters change
+            $('#statusFilter, #perInvNo').change(function() {
+                table.ajax.reload(null, false);
+            });
+
+            // Reset Filters (includes date)
+            $('#resetFilters').click(function() {
+                $('#statusFilter').val('').trigger('change');
+                $('#perInvNo').val('').trigger('change');
+
+                $('#reportrange span').html('MM/DD/YYYY - MM/DD/YYYY');
+                window.dateRange = { start: null, end: null };
+
+                // Optionally reset daterangepicker's UI state
+                if ($('#reportrange').data('daterangepicker')) {
+                    const picker = $('#reportrange').data('daterangepicker');
+                    picker.setStartDate(moment());
+                    picker.setEndDate(moment());
+                    picker.hide();
+                }
+
+                table.ajax.reload(null, false);
+            });
+        });
     </script>
+
     <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 @endsection

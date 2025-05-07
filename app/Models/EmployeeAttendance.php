@@ -14,7 +14,8 @@ class EmployeeAttendance extends Model
         'emp_id',
         'status',
         'attendance_date',
-        'over_time'
+        'over_time',
+        'is_paid'
     ];
 
     public function getCompany() {

@@ -64,13 +64,13 @@
                                         <div class="text-danger">{{ $errors->first('pannumber') }}</div>
                                     @endif
                                 </div>
-                                <div class="col-6 col-md-6">
+                                {{-- <div class="col-6 col-md-6">
                                     <label for="productname">GST Number <span class="text-danger">*</span></label>
                                     <input id="productname" name="gstnumber" type="text" class="form-control" value="{{$companies->gstnumber}}" placeholder="GST Number">
                                     @if ($errors->has('gstnumber'))
                                         <div class="text-danger">{{ $errors->first('gstnumber') }}</div>
                                     @endif
-                                </div>
+                                </div> --}}
                                 <div class="col-6 col-md-4">
                                     <label for="productname">Vendor Code <span class="text-danger">*</span></label>
                                     <input id="productname" name="vendor_code" type="text" class="form-control" value="{{$companies->vendor_code}}" placeholder="Vendor Code">
@@ -137,7 +137,7 @@
                                         @if($gstNumbers->isNotEmpty())
                                             @foreach($gstNumbers as $key => $gst)
                                                 <div class="gst-input-group" style="display: flex; margin-bottom: 5px;">
-                                                    <input type="hidden" name="gid" value="{{$gst->id}}">
+                                                    <input type="hidden" name="gid[]" value="{{$gst->id}}">
                                                     <input name="gstnumber[]"
                                                         style="margin-right: 8px;"
                                                         type="text"

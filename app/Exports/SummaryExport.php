@@ -13,32 +13,36 @@ class SummaryExport implements FromView, WithTitle
     protected $gstNumber;
     protected $panNumber;
     protected $state;
+    protected $comany_id;
 
-    public function __construct($summaries, $companyName, $gstNumber, $panNumber, $state)
+    public function __construct($summaries, $companyName, $gstNumber, $panNumber, $state, $comany_id)
     {
         $this->summaries = $summaries;
         $this->companyName = $companyName;
         $this->gstNumber = $gstNumber;
         $this->panNumber = $panNumber;
         $this->state = $state;
+        $this->comany_id = $comany_id;
     }
 
     // Return the Blade view for the Excel export
     public function view(): View
     {
-        // Prepare the data to be passed to the Blade view
         return view('admin.accountant.reports.masterexcel', [
             'summaries' => $this->summaries,
             'companyName' => $this->companyName,
             'gstNumber' => $this->gstNumber,
             'panNumber' => $this->panNumber,
-            'state' => $this->state
+            'state' => $this->state,
+            'comany_id' => $this->comany_id,
         ]);
     }
 
     // Set the title for the Excel sheet
     public function title(): string
     {
-        return 'SummarySheet';  // You can change the sheet name as needed
+        return 'SummarySheet';
     }
 }
+
+

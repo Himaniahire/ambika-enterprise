@@ -130,11 +130,7 @@
                                                                         @if($index === 0)
                                                                             <input data-repeater-create type="button" class="form-control btn btn-info addDoc mt-5 mt-lg-0" value="+" />
                                                                         @else
-                                                                            <form action="{{ route('complacences.destroyDoc', $document->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this document?');">
-                                                                                @csrf
-                                                                                @method('DELETE')
-                                                                                <button type="submit" class="form-control btn btn-danger mt-5 mt-lg-0">x</button>
-                                                                            </form>
+                                                                            <a href="javascript:void(0);" data-id="{{$document->id}}" class="form-control btn btn-danger mt-5 mt-lg-0 remove-input-field">x</a>
                                                                         @endif
                                                                     </td>
                                                                 </tr>
@@ -198,5 +194,32 @@ $(document).ready(function () {
         });
     });
 
+
+    $(document).ready(function() {
+            $('.remove-input-field').click(function() {
+                var productId = $(this).data('id');
+                var row = $('#product-row-' + productId);
+
+                if (confirm('Are you sure you want to delete this product?')) {
+                    $.ajax({
+                        url:  "{{ route('complacences.deleteDoc', ':id') }}".replace(':id', productId),
+                        type: 'DELETE',
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                row.remove();
+                            } else {
+                                alert('Failed to delete the product.');
+                            }
+                        },
+                        error: function(xhr) {
+                            alert('Error: ' + xhr.status + ' ' + xhr.statusText);
+                        }
+                    });
+                }
+            });
+        });
 </script>
 @endsection

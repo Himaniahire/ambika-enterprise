@@ -26,4 +26,11 @@ class RegisterCompany extends Model
         'doa',
         'is_lut'
     ];
+    
+    public function summaries()
+    {
+        return $this->hasMany(\App\Models\Summary::class, 'company_id', 'id');
+    }
+
+
 }

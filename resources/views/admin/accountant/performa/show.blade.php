@@ -217,7 +217,7 @@
                     <div class="text-center">
                         <div class="col-3">
                             <p class="p-tag">INVOICE DATE :</p>
-                            <p class="p-tag" style="font-weight: normal;">{{$performas->performa_date}}</p>
+                            <p class="p-tag" style="font-weight: normal;">{{ \Carbon\Carbon::parse($performas->performa_date)->format('d-m-Y') }}</p>
                         </div>
 
                         @if ($purchaseOrder)
@@ -259,10 +259,10 @@
             <tr class="bt" >
                 @if ($performas->tax == NULL)
                     <th class="padding" colspan="3" style="border-right: none">
-                        <p>LUT NO:- {{'AD2404240149753' ?? $invoice->getCompany->lut_no}} </p>
+                        <p>LUT NO:- {{$performas->getCompany->lut_no}} </p>
                     </th>
                     <th class="padding" colspan="4">
-                        <p>DOA:- {{'08/04/2024 '?? $invoice->getCompany->doa}}</p>
+                        <p>DOA:- {{\Carbon\Carbon::parse($performas->getCompany->doa)->format('d-m-Y')}}</p>
                     </th>
                 @endif
             </tr>

@@ -62,6 +62,10 @@ class PerformaController extends Controller
                     ->orWhere('performa_status', '=', 'Cancel');
                 });
 
+            if ($request->has('start_date') && $request->has('end_date')) {
+                $query->whereBetween('performa_date', [$request->start_date, $request->end_date]);
+            }
+
             $search = trim($search);
             // Add search filter if there's a search term
             if (!empty($search)) {
@@ -77,7 +81,7 @@ class PerformaController extends Controller
 
             $totalData = $query->count();
             $totalFiltered = $totalData;
-
+            $totalGstAmount = 0;
             // Apply pagination and ordering
             $performa = $query->offset($start)
                             ->limit($limit)
@@ -122,11 +126,12 @@ class PerformaController extends Controller
                 : '<a href="javascript:void(0);" class="btn btn-sm btn-soft-danger" onclick="showToastrMessage(\'Performa not available\')">
                     <i data-feather="file-text"></i>
                 </a>';
+                $totalGstAmount += (float) $item->gst_amount;
 
                 $data[] = [
                     'DT_RowIndex' => $i++,
                     'company_name' => $item->getCompany->companyname,
-                    'performa_date' => $item->performa_date ?? 'N/A',
+                    'performa_date' => \Carbon\Carbon::parse($item->performa_date)->format('d-m-Y') ?? 'N/A',
                     'performa_no' => $item->performa_no ?? 'N/A',
                     'sum_no' => $item->sum_no,
                     'invoice_no' => $item->invoice_no ?? 'N/A',
@@ -146,36 +151,6 @@ class PerformaController extends Controller
                                         <a href="#" class="btn btn-sm btn-soft-primary" type="button" data-bs-toggle="modal" data-bs-target="#editPerformaModal_' . $item->id . '">
                                             <i data-feather="edit"></i>
                                         </a>
-
-                                        <div class="modal fade" id="editPerformaModal_' . $item->id . '" tabindex="-1" role="dialog" aria-labelledby="modalTitleEdit_' . $item->id . '" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-centered" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="modalTitleEdit_' . $item->id . '">Update Performa Details</h5>
-                                                        <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <form action="' . route('performa.update', $item->id) . '" method="POST">
-                                                            ' . csrf_field() . '
-                                                            ' . method_field('PUT') . '
-                                                            <div class="row gx-3 mb-3">
-                                                                <div class="col-6 col-md-6">
-                                                                    <label class="small mb-1" for="performa_date_' . $item->id . '">Performa Date <span class="text-danger">*</span></label>
-                                                                    <input class="form-control" id="performa_date_' . $item->id . '" type="text" name="performa_date" value="' . $item->performa_date . '" />
-                                                                    <span id="error-performa-date-message" class="error"></span>
-                                                                </div>
-                                                                <div class="col-6 col-md-6">
-                                                                    <label class="small mb-1" for="performa_no_' . $item->id . '">Performa No <span class="text-danger">*</span></label>
-                                                                    <input class="form-control" id="performa_no_' . $item->id . '" type="text" name="performa_no" value="' . $item->performa_no . '"
-                                                                        ' . (auth()->user()->role_id == 1 ? '' : 'readonly') . '/>
-                                                                </div>
-                                                            </div>
-                                                            <button class="btn btn-primary" type="submit">Update Performa</button>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
                                     </li>
                                     <li>
                                         <form action="' . route('performa.destroy', $item->id) . '" method="POST">
@@ -196,6 +171,35 @@ class PerformaController extends Controller
                                 </div>
                             </ul>
                         </div>
+                        <div class="modal fade" id="editPerformaModal_' . $item->id . '" tabindex="-1" role="dialog" aria-labelledby="modalTitleEdit_' . $item->id . '" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="modalTitleEdit_' . $item->id . '">Update Performa Details</h5>
+                                        <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form action="' . route('performa.update', $item->id) . '" method="POST">
+                                            ' . csrf_field() . '
+                                            ' . method_field('PUT') . '
+                                            <div class="row gx-3 mb-3">
+                                                <div class="col-6 col-md-6">
+                                                    <label class="small mb-1" for="performa_date_' . $item->id . '">Performa Date <span class="text-danger">*</span></label>
+                                                    <input class="form-control" id="performa_date_' . $item->id . '" type="text" name="performa_date" value="' . $item->performa_date . '" />
+                                                    <span id="error-performa-date-message" class="error"></span>
+                                                </div>
+                                                <div class="col-6 col-md-6">
+                                                    <label class="small mb-1" for="performa_no_' . $item->id . '">Performa No <span class="text-danger">*</span></label>
+                                                    <input class="form-control" id="performa_no_' . $item->id . '" type="text" name="performa_no" value="' . $item->performa_no . '"
+                                                        ' . (auth()->user()->role_id == 1 ? '' : 'readonly') . '/>
+                                                </div>
+                                            </div>
+                                            <button class="btn btn-primary" type="submit">Update Performa</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     ',
                 ];
             }
@@ -205,7 +209,8 @@ class PerformaController extends Controller
                 "draw" => intval($request->input('draw')),
                 "recordsTotal" => intval($totalData),
                 "recordsFiltered" => intval($totalFiltered),
-                "data" => $data
+                "data" => $data,
+                "total_gst_amount" => number_format($totalGstAmount, 2)
             ];
 
             return response()->json($json_data);
@@ -461,15 +466,15 @@ class PerformaController extends Controller
     $digits_length = strlen($no);
     $i = 0;
     $str = [];
-    
+
     $words = [
-        0 => '', 1 => 'One', 2 => 'Two', 3 => 'Three', 4 => 'Four', 5 => 'Five', 6 => 'Six', 
+        0 => '', 1 => 'One', 2 => 'Two', 3 => 'Three', 4 => 'Four', 5 => 'Five', 6 => 'Six',
         7 => 'Seven', 8 => 'Eight', 9 => 'Nine', 10 => 'Ten', 11 => 'Eleven', 12 => 'Twelve',
-        13 => 'Thirteen', 14 => 'Fourteen', 15 => 'Fifteen', 16 => 'Sixteen', 17 => 'Seventeen', 
-        18 => 'Eighteen', 19 => 'Nineteen', 20 => 'Twenty', 30 => 'Thirty', 40 => 'Forty', 
+        13 => 'Thirteen', 14 => 'Fourteen', 15 => 'Fifteen', 16 => 'Sixteen', 17 => 'Seventeen',
+        18 => 'Eighteen', 19 => 'Nineteen', 20 => 'Twenty', 30 => 'Thirty', 40 => 'Forty',
         50 => 'Fifty', 60 => 'Sixty', 70 => 'Seventy', 80 => 'Eighty', 90 => 'Ninety'
     ];
-    
+
     $digits = ['', 'Hundred', 'Thousand', 'Lakh', 'Crore'];
 
     while ($i < $digits_length) {
@@ -494,7 +499,7 @@ class PerformaController extends Controller
     }
 
     $Rupees = implode('', array_reverse($str));
-    
+
     // Handling decimals (Paise)
     $paise = '';
     if ($decimal > 0) {
@@ -516,13 +521,6 @@ class PerformaController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'performa_date' => ['required', 'date_format:d-m-Y'],
-        ], [
-            'performa_date.required' => 'The Performa date is required.',
-            'performa_date.date_format' => 'The Performa date must be in the format dd-mm-yyyy.',
-        ]);
-
         $performa = Summary::findOrFail($id);
         $companyId = $request->input('company_id');
         $company = RegisterCompany::findOrFail($companyId);
@@ -533,7 +531,7 @@ class PerformaController extends Controller
 
         if (is_null($performa->performa_no)) {
            $lastPerforma = Summary::whereNotNull('performa_no')
-            ->orderBy('created_at', 'desc')
+            ->orderByRaw('RIGHT(performa_no, 4) DESC')
             ->first();
 
             $lastNumber = 0;

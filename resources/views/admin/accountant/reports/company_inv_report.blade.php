@@ -64,6 +64,16 @@
                                         <input class="form-control" type="month" name="month" id="month"
                                             value="" />
                                     </div>
+                                    <div class="col-6 col-md-4" id="inputContainer">
+                                        <label class="small mb-1" for="status">Status</label>
+                                        <select class="form-control" name="status" id="status">
+                                            <option value="">Select Status</option>
+                                            <option value="All">All</option>
+                                            <option value="Complete">Complete</option>
+                                            <option value="Pending">Pending</option>
+                                            <option value="Cancel">Cancel</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <button class="btn btn-primary" type="submit">Search</button>
                             </form>
@@ -168,6 +178,7 @@ $(document).ready(function() {
         var startDate = $('#start_date').val();
         var endDate = $('#end_date').val();
         var month = $('#month').val();
+        var status = $('#status').val();
 
         $.ajax({
             url: '{{ route("fetch.data.company.inv") }}',
@@ -177,6 +188,7 @@ $(document).ready(function() {
                 start_date: startDate,
                 end_date: endDate,
                 month: month,
+                status: status,
                 _token: $('meta[name="csrf-token"]').attr('content') // Fetch CSRF token from meta tag
             },
             success: function(response) {
@@ -192,7 +204,7 @@ $(document).ready(function() {
                     { data: 'performa_date', title: 'Performa Date', defaultContent: 'N/A' },
                     { data: 'invoice_no', title: 'Invoice No', defaultContent: 'N/A' },
                     { data: 'performa_no', title: 'Performa No', defaultContent: 'N/A' },
-                    { data: 'po_no', title: 'PO No', defaultContent: 'N/A' },
+                    { data: 'po_no', title: 'PO No', defaultContent: 'N/A', width: '100px' },
                     { data: 'total', title: 'PO Total', defaultContent: 'N/A' },
                     { data: 'price_total', title: 'Amount without Tax', defaultContent: 'N/A' },
                     { data: 'gst_amount', title: 'Amount With Tax', defaultContent: 'N/A' }
@@ -206,7 +218,7 @@ $(document).ready(function() {
                         {
                             extend: 'excelHtml5',
                             text: 'Excel',
-                            title: 'Pending Invoice',
+                            title: 'Pending Performa',
                             customize: function(xlsx) {
                                 var sheet = xlsx.xl.worksheets['sheet1.xml']; // Access the Excel sheet
 
@@ -241,7 +253,7 @@ $(document).ready(function() {
                         {
                             extend: 'pdfHtml5',
                             text: 'PDF',
-                            title: 'Pending Invoice',
+                            title: 'Pending Performa',
                             customize: function(doc) {
                                 var allRows = dataTable.rows().data(); // Fetch all rows' data
 
@@ -280,7 +292,7 @@ $(document).ready(function() {
                         {
                             extend: 'print',
                             text: 'Print',
-                            title: 'Pending Invoice',
+                            title: 'Pending Performa',
                             customize: function(win) {
                                 // Get all the rows' data (including rows from all pages)
                                 var allRows = dataTable.rows().data();
@@ -340,7 +352,7 @@ $(document).ready(function() {
 
                         $('#reportTable tfoot').remove(); // Target the correct table
 
-                        var grandTotalRow = '<tfoot><tr><td></td><td></td><td></td><td></td><td></td><td>Grand Total:</td><td>' + grandTotal + '</td><td>' + grandGSTTotal + '</td></tr></tfoot>';
+                        var grandTotalRow = '<tfoot><tr><td></td><td></td><td></td><td></td><td></td><td></td><td>Grand Total:</td><td>' + grandTotal + '</td><td>' + grandGSTTotal + '</td></tr></tfoot>';
                         $('#reportTable').append(grandTotalRow);
 
                         // Update row count display
